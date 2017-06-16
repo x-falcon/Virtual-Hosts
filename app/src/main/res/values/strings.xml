@@ -14,4 +14,5 @@
     <string name="dialog_title">Hosts File unselected or been deleted</string>
     <string name="dialog_message">Hosts File unselected or been deleted,Please Select Hosts File</string>
     <string name="dialog_confirm">confirm</string>
+    <string name="dns_server">8.8.8.8</string>
 </resources>

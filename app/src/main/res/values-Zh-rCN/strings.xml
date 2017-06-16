@@ -14,4 +14,5 @@
     <string name="dialog_title">Hosts文件未选择或已经删除</string>
     <string name="dialog_message">Hosts文件未选择或已经删除,请选择新的Hosts文件</string>
     <string name="dialog_confirm">确定</string>
+    <string name="dns_server">114.114.114.114</string>
 </resources>

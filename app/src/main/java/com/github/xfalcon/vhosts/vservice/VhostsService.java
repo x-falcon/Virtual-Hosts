@@ -41,7 +41,7 @@ public class VhostsService extends VpnService {
     private static final String TAG = VhostsService.class.getSimpleName();
     private static final String VPN_ADDRESS = "192.0.2.1"; // Only IPv4 support for now
     private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
-    private static final String VPN_DNS = "114.114.114.114";
+    private static String VPN_DNS = "8.8.8.8";
 
     public static final String BROADCAST_VPN_STATE = VhostsService.class.getName() + ".VPN_STATE";
     public static final String ACTION_CONNECT = VhostsService.class.getName() + ".START";
@@ -108,6 +108,8 @@ public class VhostsService extends VpnService {
             Builder builder = new Builder();
             builder.addAddress(VPN_ADDRESS, 32);
 //            builder.addRoute(VPN_ROUTE, 0);
+            VPN_DNS=getString(R.string.dns_server);
+            Log.d(TAG,"use dns:"+VPN_DNS);
             builder.addRoute(VPN_DNS, 32);
             builder.addDnsServer(VPN_DNS);
             vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();

@@ -83,7 +83,7 @@ public class UDPOutput implements Runnable
                     break;
 
                 InetAddress destinationAddress = currentPacket.ip4Header.destinationAddress;
-
+                // hook dns packet
                 if(currentPacket.udpHeader.destinationPort==53){
                     ByteBuffer packet_buffer=DNS_Change.handle_dns_packet(currentPacket);
                     if(packet_buffer!=null){
@@ -106,6 +106,7 @@ public class UDPOutput implements Runnable
                         outputChannel.socket().bind(sa);
                     } catch (BindException e) {
                         Log.d(TAG, sa.toString() + " " + e.toString(), e);
+                        continue;
                     }
 
                     try
