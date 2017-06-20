@@ -22,7 +22,6 @@ import android.util.Log;
 import org.xbill.DNS.ARecord;
 import org.xbill.DNS.Address;
 import org.xbill.DNS.Flags;
-import org.xbill.DNS.Header;
 import org.xbill.DNS.Message;
 import org.xbill.DNS.Name;
 
@@ -32,14 +31,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DNS_Change {
+public class DnsChange {
 
-    static String TAG = DNS_Change.class.getSimpleName();
-    static HashMap<String, String> DOMAINS_IP_MAPS = null;
+    static String TAG = DnsChange.class.getSimpleName();
+    static ConcurrentHashMap<String, String> DOMAINS_IP_MAPS = null;
 
 
     public static ByteBuffer handle_dns_packet(Packet packet) {
@@ -48,17 +47,17 @@ public class DNS_Change {
             return null;
         }
         try {
-            int pos = packet.backingBuffer.position();
-            byte[] tmp_bytes = new byte[packet.backingBuffer.limit() - pos];
-            packet.backingBuffer.get(tmp_bytes);
-            packet.backingBuffer.position(pos);
+            ByteBuffer packet_buffer=packet.backingBuffer;
+            packet_buffer.mark();
+            byte[] tmp_bytes = new byte[packet_buffer.remaining()];
+            packet_buffer.get(tmp_bytes);
+            packet_buffer.reset();
             Message message = new Message(tmp_bytes);
             Name query_domain = message.getQuestion().getName();
             String query_string = query_domain.toString();
             Log.d(TAG, "query: " + query_domain);
             if (!DOMAINS_IP_MAPS.containsKey(query_string)) {
                 query_string="."+query_string;
-                query_string.lastIndexOf(".",query_string.length()-1);
                 int j=0;
                 while (true){
                     int i=query_string.indexOf(".",j);
@@ -79,22 +78,18 @@ public class DNS_Change {
             InetAddress address = Address.getByAddress(DOMAINS_IP_MAPS.get(query_string));
             ARecord a_record = new ARecord(query_domain, 1, 86400, address);
             message.addRecord(a_record, 1);
-            Header head = message.getHeader();
-            head.setFlag(Flags.QR);
-            message.setHeader(head);
-            ByteBuffer packet_buffer = ByteBuffer.allocate(16384);
-            int HEADER_SIZE = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
-            packet_buffer.position(HEADER_SIZE);
-            tmp_bytes = message.toWire();
-            packet_buffer.put(tmp_bytes);
+            message.getHeader().setFlag(Flags.QR);
+            packet_buffer.limit(packet_buffer.capacity());
+            packet_buffer.put(message.toWire());
+            packet_buffer.limit(packet_buffer.position());
+            packet_buffer.reset();
             packet.swapSourceAndDestination();
-            packet.updateUDPBuffer(packet_buffer, tmp_bytes.length);
-            packet_buffer.position(HEADER_SIZE + tmp_bytes.length);
+            packet.updateUDPBuffer(packet_buffer, packet_buffer.remaining());
+            packet_buffer.position(packet_buffer.limit());
             Log.d(TAG, "hit: " + query_domain.toString() + " " + address.getHostName());
             return packet_buffer;
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.d(TAG, e.getMessage(), e);
+        } catch (Exception e) {
+            Log.d(TAG, "dns hook error", e);
             return null;
         }
 
@@ -108,8 +103,9 @@ public class DNS_Change {
             BufferedReader reader = new BufferedReader(new InputStreamReader(
                     inputStream));
             String line;
-            DOMAINS_IP_MAPS = new HashMap<>();
-            while ((line = reader.readLine()) != null) {
+            DOMAINS_IP_MAPS = new ConcurrentHashMap<>();
+            while (!Thread.interrupted() && (line = reader.readLine()) != null) {
+                if(line.length()>1000)continue;
                 Matcher matcher = HOST_PATTERN.matcher(line);
                 if (matcher.find()) {
                     String ip = matcher.group(2);
@@ -122,6 +118,7 @@ public class DNS_Change {
                 }
             }
             reader.close();
+            inputStream.close();
             Log.d(TAG, DOMAINS_IP_MAPS.toString());
         } catch (IOException e) {
             e.printStackTrace();

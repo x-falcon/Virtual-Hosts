@@ -26,6 +26,7 @@ import java.nio.channels.Selector;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class UDPInput implements Runnable
 {
@@ -33,12 +34,14 @@ public class UDPInput implements Runnable
     private static final int HEADER_SIZE = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
 
     private Selector selector;
+    private ReentrantLock udpSelectorLock;
     private ConcurrentLinkedQueue<ByteBuffer> outputQueue;
 
-    public UDPInput(ConcurrentLinkedQueue<ByteBuffer> outputQueue, Selector selector)
+    public UDPInput(ConcurrentLinkedQueue<ByteBuffer> outputQueue, Selector selector, ReentrantLock udpSelectorLock)
     {
         this.outputQueue = outputQueue;
         this.selector = selector;
+        this.udpSelectorLock=udpSelectorLock;
     }
 
     @Override
@@ -51,11 +54,12 @@ public class UDPInput implements Runnable
             {
                 int readyChannels = selector.select();
                 if (readyChannels == 0) {
-                    Thread.sleep(10);
+                    Thread.sleep(11);
                     continue;
                 }
-
+                udpSelectorLock.lock();
                 Set<SelectionKey> keys = selector.selectedKeys();
+                udpSelectorLock.unlock();
                 Iterator<SelectionKey> keyIterator = keys.iterator();
 
                 while (keyIterator.hasNext() && !Thread.interrupted())
@@ -70,15 +74,18 @@ public class UDPInput implements Runnable
                         receiveBuffer.position(HEADER_SIZE);
 
                         DatagramChannel inputChannel = (DatagramChannel) key.channel();
-                        // XXX: We should handle any IOExceptions here immediately,
-                        // but that probably won't happen with UDP
-                        int readBytes = inputChannel.read(receiveBuffer);
 
+                        int readBytes=0;
+                        try {
+                            readBytes = inputChannel.read(receiveBuffer);
+                        }catch (Exception e){
+                            Log.e(TAG, "Network read error", e);
+                        }
                         Packet referencePacket = (Packet) key.attachment();
                         referencePacket.updateUDPBuffer(receiveBuffer, readBytes);
                         receiveBuffer.position(HEADER_SIZE + readBytes);
-
                         outputQueue.offer(receiveBuffer);
+
                     }
                 }
             }

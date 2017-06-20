@@ -11,8 +11,12 @@
     <string name="re_select_hosts">Re-select Hosts File</string>
     <string name="select_hosts">Select Hosts File</string>
     <string name="info">supports wildcard DNS records,Example:\nabc.com\nm.abc.com\nweb.abc.com\n=>.abc.com</string>
-    <string name="dialog_title">Hosts File unselected or been deleted</string>
-    <string name="dialog_message">Hosts File unselected or been deleted,Please Select Hosts File</string>
+    <string name="dialog_title">Please Select Hosts File</string>
+    <string name="dialog_message">The Hosts File unselected or been deleted
+    </string>
     <string name="dialog_confirm">confirm</string>
+    <string name="dialog_cancel">cancel</string>
     <string name="dns_server">8.8.8.8</string>
+    <string name="file_select_error">Error! System File Browser Not Find</string>
+    <string name="permission_error">Error! No Permission</string>
 </resources>

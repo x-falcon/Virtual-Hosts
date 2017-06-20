@@ -18,6 +18,7 @@
 
 package com.github.xfalcon.vhosts;
 import android.support.v7.app.AlertDialog;
+import android.widget.Toast;
 import com.baidu.mobstat.StatService;
 import android.content.*;
 import android.net.Uri;
@@ -31,8 +32,7 @@ import android.widget.Button;
 import com.github.xfalcon.vhosts.vservice.VhostsService;
 import com.suke.widget.SwitchButton;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.lang.reflect.Field;
 import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int SELECT_FILE_CODE = 0x05;
     public static final String PREFS_NAME = MainActivity.class.getName();
     public static final String HOSTS_URI = "HOST_URI";
-    private Uri uri = null;
 
     private boolean waitingForVPNStart;
 
@@ -62,17 +61,15 @@ public class MainActivity extends AppCompatActivity {
         StatService.autoTrace(this, true,false);
         setContentView(R.layout.activity_main);
         final SwitchButton vpnButton = (SwitchButton) findViewById(R.id.button_start_vpn);
-        final Button selcetHosts = (Button) findViewById(R.id.button_select_hosts);
-        uri = getUriByPREFS();
-        if (uri == null) {
-            selcetHosts.setText(getString(R.string.select_hosts));
+        final Button selectHosts = (Button) findViewById(R.id.button_select_hosts);
+        if (!checkHostUri()) {
+            selectHosts.setText(getString(R.string.select_hosts));
         }
         vpnButton.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(SwitchButton view, boolean isChecked) {
-                Log.d(TAG, vpnButton.isChecked() + "");
                 if (isChecked) {
-                    if (uri == null) {
+                    if (!checkHostUri()) {
                         showDialog();
                     } else {
                         startVPN();
@@ -82,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        selcetHosts.setOnClickListener(new View.OnClickListener() {
+        selectHosts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 selectFile();
@@ -95,8 +92,21 @@ public class MainActivity extends AppCompatActivity {
     private void selectFile() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("*/*");
-        intent.addCategory(Intent.CATEGORY_DEFAULT);
-        startActivityForResult(intent, SELECT_FILE_CODE);
+        try {
+            Field f= android.provider.DocumentsContract.class.getField("EXTRA_SHOW_ADVANCED");
+            intent.putExtra(f.get(f.getName()).toString(),true);
+        }catch (Exception e){
+            Log.e(TAG,"SET EXTRA_SHOW_ADVANCED",e);
+        }
+
+        try {
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            startActivityForResult(intent, SELECT_FILE_CODE);
+        }catch (Exception e){
+            Toast.makeText(this,R.string.file_select_error,Toast.LENGTH_LONG).show();
+            Log.e(TAG,"START SELECT_FILE_ACTIVE FAIL");
+        }
+
     }
 
     private void startVPN() {
@@ -108,38 +118,44 @@ public class MainActivity extends AppCompatActivity {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null);
     }
 
-    private Uri getUriByPREFS() {
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        String uri_path = settings.getString(HOSTS_URI, null);
+    private boolean checkHostUri() {
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String  uri_path = settings.getString(HOSTS_URI, null);
         if (uri_path != null) {
-            uri = Uri.parse(uri_path);
+            Uri uri = Uri.parse(uri_path);
             try {
                 InputStream inputStream = getContentResolver().openInputStream(uri);
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-
-                }
-            } catch (FileNotFoundException e) {
-                Log.d(TAG, "HOSTS FILE NOT FOUND");
-                return null;
+                inputStream.close();
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "HOSTS FILE NOT FOUND",e);
             }
-            return uri;
         }
-        return null;
+        return false;
     }
 
     private void setUriByPREFS(Intent intent) {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
-        uri = intent.getData();
+        Uri uri = intent.getData();
         final int takeFlags = intent.getFlags()
                 & (Intent.FLAG_GRANT_READ_URI_PERMISSION
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        getContentResolver().takePersistableUriPermission(uri, takeFlags);
-        editor.putString(HOSTS_URI, uri.toString());
-        editor.commit();
-        setButton(false);
+        try {
+            getContentResolver().takePersistableUriPermission(uri, takeFlags);
+            editor.putString(HOSTS_URI, uri.toString());
+            editor.apply();
+            if (checkHostUri()){
+                setButton(true);
+                setButton(false);
+            }else{
+                Toast.makeText(this,R.string.permission_error,Toast.LENGTH_LONG).show();
+            }
+
+        }catch(Exception e){
+            Log.e(TAG,"permission error",e);
+        }
+
     }
 
     private void shutdownVPN() {
@@ -153,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             waitingForVPNStart = true;
-            startService(new Intent(this, VhostsService.class).setAction(VhostsService.ACTION_CONNECT).setData(uri));
+            startService(new Intent(this, VhostsService.class).setAction(VhostsService.ACTION_CONNECT));
             setButton(false);
         } else if (requestCode == SELECT_FILE_CODE && resultCode == RESULT_OK) {
             setUriByPREFS(data);
@@ -187,11 +203,19 @@ public class MainActivity extends AppCompatActivity {
 
     private void showDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false);
+        builder.setTitle(R.string.dialog_title);
         builder.setMessage(R.string.dialog_message);
         builder.setPositiveButton(R.string.dialog_confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 selectFile();
+            }
+        });
+        builder.setNegativeButton(R.string.dialog_cancel,new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                setButton(true);
             }
         });
         builder.show();

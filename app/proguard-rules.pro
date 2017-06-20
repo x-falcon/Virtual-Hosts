@@ -16,8 +16,18 @@
 #   public *;
 #}
 
--dontwarn org.xbill.**
--keep class org.xbill.** { *; }
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** e(...);
+    public static *** i(...);
+    public static *** v(...);
+    public static *** println(...);
+    public static *** w(...);
+    public static *** wtf(...);
+}
+
+-dontwarn org.xbill.DNS.**
+-keep class org.xbill.DNS.** { *; }
 -keep class com.baidu.bottom.** { *; }
 -keep class com.baidu.kirin.** { *; }
 -keep class com.baidu.mobstat.** { *; }

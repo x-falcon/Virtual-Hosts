@@ -17,14 +17,17 @@
 package com.github.xfalcon.vhosts.vservice;
 
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import com.github.xfalcon.vhosts.MainActivity;
 import com.github.xfalcon.vhosts.NetworkReceiver;
 import com.github.xfalcon.vhosts.R;
 
@@ -35,6 +38,7 @@ import java.nio.channels.Selector;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class VhostsService extends VpnService {
@@ -48,7 +52,7 @@ public class VhostsService extends VpnService {
     public static final String ACTION_DISCONNECT = VhostsService.class.getName() + ".STOP";
 
     private static boolean isRunning = false;
-
+    private static Thread threadHandleHosts=null;
     private ParcelFileDescriptor vpnInterface = null;
 
     private PendingIntent pendingIntent;
@@ -60,14 +64,17 @@ public class VhostsService extends VpnService {
 
     private Selector udpSelector;
     private Selector tcpSelector;
+    private ReentrantLock udpSelectorLock;
+    private ReentrantLock tcpSelectorLock;
     private NetworkReceiver netStateReceiver;
 
 
     @Override
     public void onCreate() {
-        registerNetReceiver();
+//        registerNetReceiver();
         super.onCreate();
         isRunning = true;
+        setupHostFile();
         setupVPN();
         try {
             udpSelector = Selector.open();
@@ -75,12 +82,13 @@ public class VhostsService extends VpnService {
             deviceToNetworkUDPQueue = new ConcurrentLinkedQueue<>();
             deviceToNetworkTCPQueue = new ConcurrentLinkedQueue<>();
             networkToDeviceQueue = new ConcurrentLinkedQueue<>();
-
+            udpSelectorLock=new ReentrantLock();
+            tcpSelectorLock=new ReentrantLock();
             executorService = Executors.newFixedThreadPool(5);
-            executorService.submit(new UDPInput(networkToDeviceQueue, udpSelector));
-            executorService.submit(new UDPOutput(deviceToNetworkUDPQueue, networkToDeviceQueue, udpSelector, this));
-            executorService.submit(new TCPInput(networkToDeviceQueue, tcpSelector));
-            executorService.submit(new TCPOutput(deviceToNetworkTCPQueue, networkToDeviceQueue, tcpSelector, this));
+            executorService.submit(new UDPInput(networkToDeviceQueue, udpSelector, udpSelectorLock));
+            executorService.submit(new UDPOutput(deviceToNetworkUDPQueue, networkToDeviceQueue, udpSelector,udpSelectorLock, this));
+            executorService.submit(new TCPInput(networkToDeviceQueue, tcpSelector,tcpSelectorLock));
+            executorService.submit(new TCPOutput(deviceToNetworkTCPQueue, networkToDeviceQueue, tcpSelector,tcpSelectorLock, this));
             executorService.submit(new VPNRunnable(vpnInterface.getFileDescriptor(),
                     deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, networkToDeviceQueue));
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_VPN_STATE).putExtra("running", true));
@@ -93,16 +101,22 @@ public class VhostsService extends VpnService {
         }
     }
 
-    private void setupHostFile(Uri uri){
+    private void setupHostFile(){
+        SharedPreferences settings = getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        String uri_path = settings.getString(MainActivity.HOSTS_URI, null);
         try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            DNS_Change.handle_hosts(inputStream);
-            inputStream.close();
+            final InputStream inputStream = getContentResolver().openInputStream(Uri.parse(uri_path));
+            threadHandleHosts=new Thread(){
+                public void run() {
+                    DnsChange.handle_hosts(inputStream);
+                }
+            };
+            threadHandleHosts.start();
         }catch (Exception e){
             Log.e(TAG,"error setup host file service",e);
         }
-
     }
+
     private void setupVPN() {
         if (vpnInterface == null) {
             Builder builder = new Builder();
@@ -136,14 +150,14 @@ public class VhostsService extends VpnService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null && ACTION_DISCONNECT.equals(intent.getAction())) {
-            stopSelf();
-            onDestroy();
-            return START_NOT_STICKY;
-        } else {
-            setupHostFile(intent.getData());
-            return START_STICKY;
+        if (intent != null) {
+            if(ACTION_DISCONNECT.equals(intent.getAction())){
+                stopSelf();
+                onDestroy();
+                return START_NOT_STICKY;
+            }
         }
+        return START_STICKY;
     }
 
     public static boolean isRunning() {
@@ -154,11 +168,12 @@ public class VhostsService extends VpnService {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        unregisterNetReceiver();
+        if(threadHandleHosts!=null)threadHandleHosts.interrupt();
+//        unregisterNetReceiver();
         isRunning = false;
         executorService.shutdownNow();
         cleanup();
+        super.onDestroy();
         Log.i(TAG, "Stopped");
     }
 
@@ -251,7 +266,7 @@ public class VhostsService extends VpnService {
                     // TODO: Sleep-looping is not very battery-friendly, consider blocking instead
                     // Confirm if throughput with ConcurrentQueue is really higher compared to BlockingQueue
                     if (!dataSent && !dataReceived)
-                        Thread.sleep(10);
+                        Thread.sleep(11);
                 }
             } catch (InterruptedException e) {
                 Log.i(TAG, "Stopping");
