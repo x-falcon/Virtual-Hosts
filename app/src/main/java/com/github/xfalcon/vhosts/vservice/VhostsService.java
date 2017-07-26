@@ -27,6 +27,7 @@ import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
 import com.github.xfalcon.vhosts.MainActivity;
 import com.github.xfalcon.vhosts.NetworkReceiver;
 import com.github.xfalcon.vhosts.R;
@@ -52,7 +53,7 @@ public class VhostsService extends VpnService {
     public static final String ACTION_DISCONNECT = VhostsService.class.getName() + ".STOP";
 
     private static boolean isRunning = false;
-    private static Thread threadHandleHosts=null;
+    private static Thread threadHandleHosts = null;
     private ParcelFileDescriptor vpnInterface = null;
 
     private PendingIntent pendingIntent;
@@ -82,13 +83,13 @@ public class VhostsService extends VpnService {
             deviceToNetworkUDPQueue = new ConcurrentLinkedQueue<>();
             deviceToNetworkTCPQueue = new ConcurrentLinkedQueue<>();
             networkToDeviceQueue = new ConcurrentLinkedQueue<>();
-            udpSelectorLock=new ReentrantLock();
-            tcpSelectorLock=new ReentrantLock();
+            udpSelectorLock = new ReentrantLock();
+            tcpSelectorLock = new ReentrantLock();
             executorService = Executors.newFixedThreadPool(5);
             executorService.submit(new UDPInput(networkToDeviceQueue, udpSelector, udpSelectorLock));
-            executorService.submit(new UDPOutput(deviceToNetworkUDPQueue, networkToDeviceQueue, udpSelector,udpSelectorLock, this));
-            executorService.submit(new TCPInput(networkToDeviceQueue, tcpSelector,tcpSelectorLock));
-            executorService.submit(new TCPOutput(deviceToNetworkTCPQueue, networkToDeviceQueue, tcpSelector,tcpSelectorLock, this));
+            executorService.submit(new UDPOutput(deviceToNetworkUDPQueue, networkToDeviceQueue, udpSelector, udpSelectorLock, this));
+            executorService.submit(new TCPInput(networkToDeviceQueue, tcpSelector, tcpSelectorLock));
+            executorService.submit(new TCPOutput(deviceToNetworkTCPQueue, networkToDeviceQueue, tcpSelector, tcpSelectorLock, this));
             executorService.submit(new VPNRunnable(vpnInterface.getFileDescriptor(),
                     deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, networkToDeviceQueue));
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_VPN_STATE).putExtra("running", true));
@@ -101,19 +102,19 @@ public class VhostsService extends VpnService {
         }
     }
 
-    private void setupHostFile(){
+    private void setupHostFile() {
         SharedPreferences settings = getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
         String uri_path = settings.getString(MainActivity.HOSTS_URI, null);
         try {
             final InputStream inputStream = getContentResolver().openInputStream(Uri.parse(uri_path));
-            threadHandleHosts=new Thread(){
+            threadHandleHosts = new Thread() {
                 public void run() {
                     DnsChange.handle_hosts(inputStream);
                 }
             };
             threadHandleHosts.start();
-        }catch (Exception e){
-            Log.e(TAG,"error setup host file service",e);
+        } catch (Exception e) {
+            Log.e(TAG, "error setup host file service", e);
         }
     }
 
@@ -122,8 +123,8 @@ public class VhostsService extends VpnService {
             Builder builder = new Builder();
             builder.addAddress(VPN_ADDRESS, 32);
 //            builder.addRoute(VPN_ROUTE, 0);
-            VPN_DNS=getString(R.string.dns_server);
-            Log.d(TAG,"use dns:"+VPN_DNS);
+            VPN_DNS = getString(R.string.dns_server);
+            Log.d(TAG, "use dns:" + VPN_DNS);
             builder.addRoute(VPN_DNS, 32);
             builder.addDnsServer(VPN_DNS);
             vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
@@ -151,7 +152,7 @@ public class VhostsService extends VpnService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
-            if(ACTION_DISCONNECT.equals(intent.getAction())){
+            if (ACTION_DISCONNECT.equals(intent.getAction())) {
                 stopSelf();
                 onDestroy();
                 return START_NOT_STICKY;
@@ -168,7 +169,7 @@ public class VhostsService extends VpnService {
 
     @Override
     public void onDestroy() {
-        if(threadHandleHosts!=null)threadHandleHosts.interrupt();
+        if (threadHandleHosts != null) threadHandleHosts.interrupt();
 //        unregisterNetReceiver();
         isRunning = false;
         executorService.shutdownNow();
@@ -276,5 +277,21 @@ public class VhostsService extends VpnService {
                 closeResources(vpnInput, vpnOutput);
             }
         }
+    }
+
+    public static void checkStartVpnOnBoot(Context context) {
+        if (VpnService.prepare(context) != null) {
+            Log.i("BOOT", "VPN preparation not confirmed by user, changing enabled to false");
+        }
+        Intent intent = getStartIntent(context);
+        context.startService(intent);
+    }
+
+
+    private static Intent getStartIntent(Context context) {
+        Intent intent = new Intent(context, VhostsService.class);
+        intent.setAction(ACTION_CONNECT);
+        return intent;
+
     }
 }

@@ -19,4 +19,6 @@
     <string name="dns_server">8.8.8.8</string>
     <string name="file_select_error">Error! System File Browser Not Find</string>
     <string name="permission_error">Error! No Permission</string>
+    <string name="reconnect_on_boot">Reconnect on Boot</string>
+    reconnect_on_boot
 </resources>

@@ -17,9 +17,12 @@
 */
 
 package com.github.xfalcon.vhosts;
+
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
+
 import com.baidu.mobstat.StatService;
+
 import android.content.*;
 import android.net.Uri;
 import android.net.VpnService;
@@ -29,6 +32,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
 import com.github.xfalcon.vhosts.vservice.VhostsService;
 import com.suke.widget.SwitchButton;
 
@@ -42,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int SELECT_FILE_CODE = 0x05;
     public static final String PREFS_NAME = MainActivity.class.getName();
     public static final String HOSTS_URI = "HOST_URI";
+    public static final String RECONNECT_ON_REBOOT = "RECONNECT_ON_REBOOT";
 
     private boolean waitingForVPNStart;
 
@@ -58,12 +63,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        StatService.autoTrace(this, true,false);
+        StatService.autoTrace(this, true, false);
         setContentView(R.layout.activity_main);
         final SwitchButton vpnButton = (SwitchButton) findViewById(R.id.button_start_vpn);
+        final SwitchButton vpnOnReboot = (SwitchButton) findViewById(R.id.button_start_vpn_reboot);
         final Button selectHosts = (Button) findViewById(R.id.button_select_hosts);
         if (!checkHostUri()) {
             selectHosts.setText(getString(R.string.select_hosts));
+        }
+        if (checkRebootStatus()) {
+            vpnOnReboot.setChecked(true);
         }
         vpnButton.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
@@ -76,6 +85,16 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     shutdownVPN();
+                }
+            }
+        });
+        vpnOnReboot.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(SwitchButton view, boolean isChecked) {
+                if (isChecked) {
+                    setRebootStatus(true);
+                } else {
+                    setRebootStatus(false);
                 }
             }
         });
@@ -93,18 +112,18 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("*/*");
         try {
-            Field f= android.provider.DocumentsContract.class.getField("EXTRA_SHOW_ADVANCED");
-            intent.putExtra(f.get(f.getName()).toString(),true);
-        }catch (Exception e){
-            Log.e(TAG,"SET EXTRA_SHOW_ADVANCED",e);
+            Field f = android.provider.DocumentsContract.class.getField("EXTRA_SHOW_ADVANCED");
+            intent.putExtra(f.get(f.getName()).toString(), true);
+        } catch (Exception e) {
+            Log.e(TAG, "SET EXTRA_SHOW_ADVANCED", e);
         }
 
         try {
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             startActivityForResult(intent, SELECT_FILE_CODE);
-        }catch (Exception e){
-            Toast.makeText(this,R.string.file_select_error,Toast.LENGTH_LONG).show();
-            Log.e(TAG,"START SELECT_FILE_ACTIVE FAIL");
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.file_select_error, Toast.LENGTH_LONG).show();
+            Log.e(TAG, "START SELECT_FILE_ACTIVE FAIL");
         }
 
     }
@@ -120,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean checkHostUri() {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String  uri_path = settings.getString(HOSTS_URI, null);
+        String uri_path = settings.getString(HOSTS_URI, null);
         if (uri_path != null) {
             Uri uri = Uri.parse(uri_path);
             try {
@@ -128,10 +147,23 @@ public class MainActivity extends AppCompatActivity {
                 inputStream.close();
                 return true;
             } catch (Exception e) {
-                Log.e(TAG, "HOSTS FILE NOT FOUND",e);
+                Log.e(TAG, "HOSTS FILE NOT FOUND", e);
             }
         }
         return false;
+    }
+
+    private boolean checkRebootStatus() {
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return settings.getBoolean(RECONNECT_ON_REBOOT, false);
+    }
+
+    private void setRebootStatus(boolean status) {
+        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean(RECONNECT_ON_REBOOT, status);
+        editor.apply();
+
     }
 
     private void setUriByPREFS(Intent intent) {
@@ -145,15 +177,15 @@ public class MainActivity extends AppCompatActivity {
             getContentResolver().takePersistableUriPermission(uri, takeFlags);
             editor.putString(HOSTS_URI, uri.toString());
             editor.apply();
-            if (checkHostUri()){
+            if (checkHostUri()) {
                 setButton(true);
                 setButton(false);
-            }else{
-                Toast.makeText(this,R.string.permission_error,Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, R.string.permission_error, Toast.LENGTH_LONG).show();
             }
 
-        }catch(Exception e){
-            Log.e(TAG,"permission error",e);
+        } catch (Exception e) {
+            Log.e(TAG, "permission error", e);
         }
 
     }
@@ -212,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                 selectFile();
             }
         });
-        builder.setNegativeButton(R.string.dialog_cancel,new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 setButton(true);
