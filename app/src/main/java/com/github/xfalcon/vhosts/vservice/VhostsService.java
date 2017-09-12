@@ -121,7 +121,7 @@ public class VhostsService extends VpnService {
         if (vpnInterface == null) {
             Builder builder = new Builder();
             builder.addAddress(VPN_ADDRESS, 32);
-//            builder.addRoute(VPN_ROUTE, 0);
+            builder.addRoute(VPN_ROUTE, 0);
             VPN_DNS=getString(R.string.dns_server);
             Log.d(TAG,"use dns:"+VPN_DNS);
             builder.addRoute(VPN_DNS, 32);
