@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.VpnService;
@@ -122,22 +121,22 @@ public class VhostsService extends VpnService {
     private void setupVPN() {
         if (vpnInterface == null) {
             Builder builder = new Builder();
-
-            try {
-                builder.addDisallowedApplication("com.android.vending"); //white list play store
-                builder.addDisallowedApplication("com.google.android.apps.docs"); //white list google drive
-                builder.addDisallowedApplication("com.google.android.apps.photos"); //white list google photos
-                builder.addDisallowedApplication("com.google.android.gm"); //white list gmail
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
-            }
-
             builder.addAddress(VPN_ADDRESS, 32);
             builder.addRoute(VPN_ROUTE, 0);
             VPN_DNS=getString(R.string.dns_server);
             Log.d(TAG,"use dns:"+VPN_DNS);
             builder.addRoute(VPN_DNS, 32);
             builder.addDnsServer(VPN_DNS);
+            
+        try {
+                builder.addDisallowedApplication("com.android.vending"); //white list play store
+                builder.addDisallowedApplication("com.google.android.apps.docs"); //white list google drive
+                builder.addDisallowedApplication("com.google.android.apps.photos"); //white list google photos
+                builder.addDisallowedApplication("com.google.android.gm"); //white list gmail
+            } catch (Throwable e) {
+                LogUtils.d(TAG,"sdk < 21",e);
+            }
+            
             vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
 
         }
