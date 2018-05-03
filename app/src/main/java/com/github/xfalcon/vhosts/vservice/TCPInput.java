@@ -52,6 +52,9 @@ public class TCPInput implements Runnable
             LogUtils.i(TAG, "Started");
             while (!Thread.interrupted())
             {
+                tcpSelectorLock.lock();
+                tcpSelectorLock.unlock();
+
                 int readyChannels = selector.select();
 
                 if (readyChannels == 0) {

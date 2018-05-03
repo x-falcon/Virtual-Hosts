@@ -51,6 +51,8 @@ public class UDPInput implements Runnable
             LogUtils.i(TAG, "Started");
             while (!Thread.interrupted())
             {
+                udpSelectorLock.lock();
+                udpSelectorLock.unlock();
                 int readyChannels = selector.select();
                 if (readyChannels == 0) {
                     Thread.sleep(11);
