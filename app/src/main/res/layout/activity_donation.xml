@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        tools:context="com.github.xfalcon.vhosts.DonationActivity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" tools:layout_editor_absoluteY="0dp"
+        tools:layout_editor_absoluteX="8dp">
+
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="16dp"
+
+            tools:layout_editor_absoluteY="0dp" tools:layout_editor_absoluteX="8dp">
+
+        <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp"
+        >
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+            >
+
+                <TextView
+                        android:id="@+id/notice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/welcome"
+                        android:textSize="16sp"
+                />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp"
+        >
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+            >
+
+                <Button
+                        android:id="@+id/bt_rate"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="@string/rate"
+                />
+
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp"
+                android:id="@+id/cv_alipay"
+        >
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+            >
+
+                <Button
+                        android:id="@+id/bt_alipay"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="@string/alipay"
+                />
+
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp"
+                android:id="@+id/cv_wexin"
+        >
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+            >
+
+
+                <Button
+                        android:id="@+id/bt_weixin"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="@string/wechat"
+                />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp"
+                android:id="@+id/cv_paypal"
+        >
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+            >
+
+
+                <Button
+                        android:id="@+id/bt_paypal"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="@string/paypal"
+                />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp"
+                android:id="@+id/cv_google"
+        >
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+            >
+
+
+                <Button
+                        android:id="@+id/bt_google"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:enabled="false"
+                        android:text="@string/googleplay"
+                />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp"
+                android:id="@+id/cv_google2"
+        >
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+            >
+
+
+                <Button
+                        android:id="@+id/bt_google2"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:enabled="false"
+                        android:text="@string/googleplay2"
+                />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp"
+                android:id="@+id/cv_google4"
+        >
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+            >
+
+
+                <Button
+                        android:id="@+id/bt_google4"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:enabled="false"
+                        android:text="@string/googleplay4"
+                />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp"
+                android:id="@+id/cv_google6"
+        >
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+            >
+
+
+                <Button
+                        android:id="@+id/bt_google6"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:enabled="false"
+                        android:text="@string/googleplay6"
+                />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp"
+                android:id="@+id/cv_google8"
+        >
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+            >
+
+
+                <Button
+                        android:id="@+id/bt_google8"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:enabled="false"
+                        android:text="@string/googleplay8"
+                />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp"
+                android:id="@+id/cv_google10"
+        >
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+            >
+
+
+                <Button
+                        android:id="@+id/bt_google10"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:enabled="false"
+                        android:text="@string/googleplay10"
+                />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="4dp"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="4dp"
+                app:cardElevation="2dp"
+                android:id="@+id/cv_bit"
+        >
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp"
+            >
+
+
+                <Button
+                        android:id="@+id/bt_bit"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="@string/bitcoin"
+                />
+
+            </LinearLayout>
+
+        </android.support.v7.widget.CardView>
+
+    </LinearLayout>
+</ScrollView>

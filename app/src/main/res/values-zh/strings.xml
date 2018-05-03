@@ -1,0 +1,37 @@
+<resources>
+    <string name="app_name">Virtual Hosts</string>
+    <string name="action_settings">Settings</string>
+    <string name="update_button">更新</string>
+    <string name="update_hosts">选择ip更新hosts</string>
+    <string name="clear_hosts">清空hosts</string>
+    <string name="load_hosts">加载hosts</string>
+    <string name="backup_hosts">备份hosts</string>
+    <string name="start_vpn">开启</string>
+    <string name="stop_vpn">停止vpn</string>
+    <string name="re_select_hosts">重新选择hosts文件</string>
+    <string name="select_hosts">选择hosts文件</string>
+    <string name="info">支持泛解析,示例:\nabc.com\nm.abc.com\nweb.abc.com\n=>.abc.com</string>
+    <string name="dialog_title"><font color="@color/primary_text">请选择Hosts文件</font></string>
+    <string name="dialog_message"><font color="@color/secondary_text">Hosts文件未选择或已经删除</font>
+    </string>
+    <string name="dialog_confirm">确定</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="dns_server">114.114.114.114</string>
+    <string name="file_select_error">错误! 找不到系统文件浏览器</string>
+    <string name="permission_error">错误! 没有权限</string>
+    <string name="fab_label_boot">开机启动</string>
+    <string name="fab_label_donation">打赏</string>
+    <string name="welcome">您的支持将使我们的软件做的更好!\n您可以通过以下方式支持我们.</string>
+    <string name="rate">去Google Play商店给个好评</string>
+    <string name="alipay">支付宝捐赠</string>
+    <string name="wechat">微信捐赠</string>
+    <string name="paypal">Paypal捐赠</string>
+    <string name="googleplay">Google Play捐赠</string>
+    <string name="googleplay2">Google Play捐赠 2 $</string>
+    <string name="googleplay4">Google Play捐赠 4 $</string>
+    <string name="googleplay6">Google Play捐赠 6 $</string>
+    <string name="googleplay8">Google Play捐赠 8 $</string>
+    <string name="googleplay10">Google Play捐赠 10 $</string>
+    <string name="bitcoin">比特币捐赠</string>
+    <string name="tip_bitcoin">比特币地址已经复制到剪切板</string>
+</resources>
