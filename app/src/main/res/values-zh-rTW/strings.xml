@@ -37,4 +37,9 @@
     <string name="googleplay10">Google Play捐贈 10 $</string>
     <string name="bitcoin">比特幣捐贈</string>
     <string name="tip_bitcoin">比特幣地址已經複製到剪切板</string>
+    <string name="radio_local">來自本地</string>
+    <string name="radio_net">來自網絡</string>
+    <string name="url_error">URL輸入不正確</string>
+    <string name="down_success">下載成功，獲取到 %d 條記錄</string>
+    <string name="down_error">下載失敗</string>
 </resources>

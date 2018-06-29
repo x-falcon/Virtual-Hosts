@@ -11,8 +11,11 @@
     <string name="re_select_hosts">Re-select Hosts File</string>
     <string name="select_hosts">Select Hosts File</string>
     <string name="info">supports wildcard DNS records,Example:\nabc.com\nm.abc.com\nweb.abc.com\n=>.abc.com</string>
-    <string name="dialog_title"><font color="@color/primary_text">Please Select Hosts File</font></string>
-    <string name="dialog_message"><font color="@color/secondary_text">The Hosts File unselected or been deleted</font>
+    <string name="dialog_title">
+        <font color="@color/primary_text">Please Select Hosts File</font>
+    </string>
+    <string name="dialog_message">
+        <font color="@color/secondary_text">The Hosts File unselected or been deleted</font>
     </string>
     <string name="dialog_confirm">confirm</string>
     <string name="dialog_cancel">cancel</string>
@@ -21,7 +24,9 @@
     <string name="permission_error">Error! No Permission</string>
     <string name="fab_label_boot">On Startup</string>
     <string name="fab_label_donation">Donate</string>
-    <string name="welcome">Your support is the greatest impetus for us.\nYou can support us through the following ways.</string>
+    <string name="welcome">Your support is the greatest impetus for us.\nYou can support us through the following
+        ways.
+    </string>
     <string name="rate">Rate on the Store</string>
     <string name="alipay">Donate with Alipay</string>
     <string name="wechat">Donate with WeChat</string>
@@ -34,5 +39,9 @@
     <string name="googleplay10">Donate $10 with Google Play</string>
     <string name="bitcoin">Donate with Bitcoin</string>
     <string name="tip_bitcoin">bitcoin address has copy to the clipboard</string>
-
+    <string name="radio_local">from local</string>
+    <string name="radio_net">from internet</string>
+    <string name="url_error">URL input is incorrect</string>
+    <string name="down_success">Download Success Get %d Host Records</string>
+    <string name="down_error">Download Failed</string>
 </resources>

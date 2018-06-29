@@ -1,18 +1,18 @@
 /*
-** Copyright 2015, Mohamed Naufal
-**
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
-*/
+ ** Copyright 2015, Mohamed Naufal
+ **
+ ** Licensed under the Apache License, Version 2.0 (the "License");
+ ** you may not use this file except in compliance with the License.
+ ** You may obtain a copy of the License at
+ **
+ **     http://www.apache.org/licenses/LICENSE-2.0
+ **
+ ** Unless required by applicable law or agreed to in writing, software
+ ** distributed under the License is distributed on an "AS IS" BASIS,
+ ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ ** See the License for the specific language governing permissions and
+ ** limitations under the License.
+ */
 
 package com.github.xfalcon.vhosts.vservice;
 
@@ -26,10 +26,9 @@ import android.net.Uri;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-import com.github.xfalcon.vhosts.VhostsActivity;
 import com.github.xfalcon.vhosts.NetworkReceiver;
 import com.github.xfalcon.vhosts.R;
+import com.github.xfalcon.vhosts.VhostsActivity;
 import com.github.xfalcon.vhosts.util.LogUtils;
 
 import java.io.*;
@@ -79,8 +78,8 @@ public class VhostsService extends VpnService {
         super.onCreate();
         setupHostFile();
         setupVPN();
-        if(vpnInterface==null){
-            LogUtils.d(TAG,"unknow error");
+        if (vpnInterface == null) {
+            LogUtils.d(TAG, "unknow error");
             stopVService();
             return;
         }
@@ -91,13 +90,13 @@ public class VhostsService extends VpnService {
             deviceToNetworkUDPQueue = new ConcurrentLinkedQueue<>();
             deviceToNetworkTCPQueue = new ConcurrentLinkedQueue<>();
             networkToDeviceQueue = new ConcurrentLinkedQueue<>();
-            udpSelectorLock=new ReentrantLock();
-            tcpSelectorLock=new ReentrantLock();
+            udpSelectorLock = new ReentrantLock();
+            tcpSelectorLock = new ReentrantLock();
             executorService = Executors.newFixedThreadPool(5);
             executorService.submit(new UDPInput(networkToDeviceQueue, udpSelector, udpSelectorLock));
-            executorService.submit(new UDPOutput(deviceToNetworkUDPQueue, networkToDeviceQueue, udpSelector,udpSelectorLock, this));
-            executorService.submit(new TCPInput(networkToDeviceQueue, tcpSelector,tcpSelectorLock));
-            executorService.submit(new TCPOutput(deviceToNetworkTCPQueue, networkToDeviceQueue, tcpSelector,tcpSelectorLock, this));
+            executorService.submit(new UDPOutput(deviceToNetworkUDPQueue, networkToDeviceQueue, udpSelector, udpSelectorLock, this));
+            executorService.submit(new TCPInput(networkToDeviceQueue, tcpSelector, tcpSelectorLock));
+            executorService.submit(new TCPOutput(deviceToNetworkTCPQueue, networkToDeviceQueue, tcpSelector, tcpSelectorLock, this));
             executorService.submit(new VPNRunnable(vpnInterface.getFileDescriptor(),
                     deviceToNetworkUDPQueue, deviceToNetworkTCPQueue, networkToDeviceQueue));
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_VPN_STATE).putExtra("running", true));
@@ -113,15 +112,21 @@ public class VhostsService extends VpnService {
 
     private void setupHostFile() {
         SharedPreferences settings = getSharedPreferences(VhostsActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        boolean is_local = settings.getBoolean(VhostsActivity.IS_LOCAL, true);
+
         String uri_path = settings.getString(VhostsActivity.HOSTS_URI, null);
         try {
-            final InputStream inputStream = getContentResolver().openInputStream(Uri.parse(uri_path));
-            threadHandleHosts = new Thread() {
+            final InputStream inputStream;
+            if (is_local)
+                inputStream = getContentResolver().openInputStream(Uri.parse(uri_path));
+            else inputStream = openFileInput(VhostsActivity.NET_HOST_FILE);
+
+            new Thread() {
                 public void run() {
                     DnsChange.handle_hosts(inputStream);
                 }
-            };
-            threadHandleHosts.start();
+            }.start();
+
         } catch (Exception e) {
             LogUtils.e(TAG, "error setup host file service", e);
         }
@@ -131,7 +136,7 @@ public class VhostsService extends VpnService {
         if (vpnInterface == null) {
             Builder builder = new Builder();
             builder.addAddress(VPN_ADDRESS, 32);
-            builder.addAddress(VPN_ADDRESS6,128);
+            builder.addAddress(VPN_ADDRESS6, 128);
             VPN_DNS4 = getString(R.string.dns_server);
             LogUtils.d(TAG, "use dns:" + VPN_DNS4);
             builder.addRoute(VPN_DNS4, 32);
@@ -140,7 +145,6 @@ public class VhostsService extends VpnService {
 //            builder.addRoute(VPN_ROUTE6,0);
             builder.addDnsServer(VPN_DNS4);
             builder.addDnsServer(VPN_DNS6);
-
             try {
                 builder.addDisallowedApplication("com.android.vending"); //white list play store
                 builder.addDisallowedApplication("com.google.android.apps.docs"); //white list google drive
@@ -148,7 +152,7 @@ public class VhostsService extends VpnService {
                 builder.addDisallowedApplication("com.google.android.gm"); //white list gmail
                 builder.addDisallowedApplication("com.google.android.apps.translate"); //white list translate
             } catch (Throwable e) {
-                LogUtils.d(TAG,"sdk < 21",e);
+                LogUtils.d(TAG, "sdk < 21", e);
             }
             vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
         }
@@ -197,8 +201,8 @@ public class VhostsService extends VpnService {
         }
         try {
             context.startService(new Intent(context, VhostsService.class).setAction(ACTION_CONNECT));
-        }catch (RuntimeException e){
-            LogUtils.e(TAG,"Not allowed to start service Intent",e);
+        } catch (RuntimeException e) {
+            LogUtils.e(TAG, "Not allowed to start service Intent", e);
         }
     }
 
@@ -206,31 +210,31 @@ public class VhostsService extends VpnService {
         context.startService(new Intent(context, VhostsService.class).setAction(VhostsService.ACTION_DISCONNECT));
     }
 
-    private void stopVService(){
+    private void stopVService() {
         if (threadHandleHosts != null) threadHandleHosts.interrupt();
 //        unregisterNetReceiver();
-        if(executorService !=null) executorService.shutdownNow();
+        if (executorService != null) executorService.shutdownNow();
         isRunning = false;
         cleanup();
         stopSelf();
-        LogUtils.d(TAG,"Stopping");
+        LogUtils.d(TAG, "Stopping");
     }
 
     @Override
-    public void onRevoke(){
+    public void onRevoke() {
         stopVService();
         super.onRevoke();
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         stopVService();
         super.onDestroy();
     }
 
     private void cleanup() {
-        udpSelectorLock=null;
-        tcpSelectorLock=null;
+        udpSelectorLock = null;
+        tcpSelectorLock = null;
         deviceToNetworkTCPQueue = null;
         deviceToNetworkUDPQueue = null;
         networkToDeviceQueue = null;
@@ -244,7 +248,7 @@ public class VhostsService extends VpnService {
             try {
                 resource.close();
             } catch (Exception e) {
-                LogUtils.e(TAG,e.toString(),e);
+                LogUtils.e(TAG, e.toString(), e);
             }
         }
     }
@@ -307,8 +311,8 @@ public class VhostsService extends VpnService {
                         while (bufferFromNetwork.hasRemaining())
                             try {
                                 vpnOutput.write(bufferFromNetwork);
-                            }catch (Exception e){
-                                LogUtils.e(TAG,e.toString(),e);
+                            } catch (Exception e) {
+                                LogUtils.e(TAG, e.toString(), e);
                                 break;
                             }
                         dataReceived = true;

@@ -1,42 +1,39 @@
 /*
-**Copyright (C) 2017  xfalcon
-**
-**This program is free software: you can redistribute it and/or modify
-**it under the terms of the GNU General Public License as published by
-**the Free Software Foundation, either version 3 of the License, or
-**(at your option) any later version.
-**
-**This program is distributed in the hope that it will be useful,
-**but WITHOUT ANY WARRANTY; without even the implied warranty of
-**MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-**GNU General Public License for more details.
-**
-**You should have received a copy of the GNU General Public License
-**along with this program.  If not, see <http://www.gnu.org/licenses/>.
-**
-*/
+ **Copyright (C) 2017  xfalcon
+ **
+ **This program is free software: you can redistribute it and/or modify
+ **it under the terms of the GNU General Public License as published by
+ **the Free Software Foundation, either version 3 of the License, or
+ **(at your option) any later version.
+ **
+ **This program is distributed in the hope that it will be useful,
+ **but WITHOUT ANY WARRANTY; without even the implied warranty of
+ **MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ **GNU General Public License for more details.
+ **
+ **You should have received a copy of the GNU General Public License
+ **along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **
+ */
 
 package com.github.xfalcon.vhosts;
 
-import android.support.v7.app.AlertDialog;
-import android.widget.Toast;
-import com.baidu.mobstat.StatService;
-
 import android.content.*;
 import android.net.Uri;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-
+import android.widget.Toast;
+import com.baidu.mobstat.StatService;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.xfalcon.vhosts.util.LogUtils;
 import com.github.xfalcon.vhosts.vservice.VhostsService;
 import com.suke.widget.SwitchButton;
 
 import java.lang.reflect.Field;
-import java.io.InputStream;
 
 public class VhostsActivity extends AppCompatActivity {
 
@@ -44,7 +41,10 @@ public class VhostsActivity extends AppCompatActivity {
     private static final int VPN_REQUEST_CODE = 0x0F;
     private static final int SELECT_FILE_CODE = 0x05;
     public static final String PREFS_NAME = VhostsActivity.class.getName();
+    public static final String IS_LOCAL = "IS_LOCAL";
+    public static final String HOSTS_URL = "HOSTS_URL";
     public static final String HOSTS_URI = "HOST_URI";
+    public static final String NET_HOST_FILE = "net_hosts";
 
 
     private boolean waitingForVPNStart;
@@ -65,13 +65,13 @@ public class VhostsActivity extends AppCompatActivity {
         launch();
         StatService.autoTrace(this, true, false);
         setContentView(R.layout.activity_vhosts);
-        LogUtils.context=getApplicationContext();
-        final SwitchButton vpnButton = (SwitchButton) findViewById(R.id.button_start_vpn);
+        LogUtils.context = getApplicationContext();
+        final SwitchButton vpnButton = findViewById(R.id.button_start_vpn);
 
-        final Button selectHosts = (Button) findViewById(R.id.button_select_hosts);
-        final FloatingActionButton fab_boot = (FloatingActionButton) findViewById(R.id.fab_boot);
-        final FloatingActionButton fab_donation = (FloatingActionButton) findViewById(R.id.fab_donation);
-        if (!checkHostUri()) {
+        final Button selectHosts = findViewById(R.id.button_select_hosts);
+        final FloatingActionButton fab_boot = findViewById(R.id.fab_boot);
+        final FloatingActionButton fab_donation = findViewById(R.id.fab_donation);
+        if (checkHostUri() == -1) {
             selectHosts.setText(getString(R.string.select_hosts));
         }
         if (BootReceiver.getEnabled(this)) {
@@ -81,7 +81,7 @@ public class VhostsActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(SwitchButton view, boolean isChecked) {
                 if (isChecked) {
-                    if (!checkHostUri()) {
+                    if (checkHostUri() == -1) {
                         showDialog();
                     } else {
                         startVPN();
@@ -95,25 +95,33 @@ public class VhostsActivity extends AppCompatActivity {
         fab_boot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(BootReceiver.getEnabled(v.getContext())){
-                    BootReceiver.setEnabled(v.getContext(),false);
+                if (BootReceiver.getEnabled(v.getContext())) {
+                    BootReceiver.setEnabled(v.getContext(), false);
                     fab_boot.setColorNormalResId(R.color.startup_off);
-                }else{
-                    BootReceiver.setEnabled(v.getContext(),true);
+                } else {
+                    BootReceiver.setEnabled(v.getContext(), true);
                     fab_boot.setColorNormalResId(R.color.startup_on);
                 }
             }
-        }) ;
+        });
         selectHosts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 selectFile();
             }
         });
+        selectHosts.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                startActivity(new Intent(getApplicationContext(), AdvanceActivity.class));
+
+                return false;
+            }
+        });
         fab_donation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(),DonationActivity.class));
+                startActivity(new Intent(getApplicationContext(), DonationActivity.class));
             }
         });
 
@@ -121,15 +129,15 @@ public class VhostsActivity extends AppCompatActivity {
                 new IntentFilter(VhostsService.BROADCAST_VPN_STATE));
     }
 
-    private void launch(){
-        Uri uri=getIntent().getData();
-        if(uri==null)return;
-        String data_str=uri.toString();
-        if("on".equals(data_str)){
-            if(!VhostsService.isRunning())
-            VhostsService.startVService(this);
+    private void launch() {
+        Uri uri = getIntent().getData();
+        if (uri == null) return;
+        String data_str = uri.toString();
+        if ("on".equals(data_str)) {
+            if (!VhostsService.isRunning())
+                VhostsService.startVService(this);
             finish();
-        }else if("off".equals(data_str)){
+        } else if ("off".equals(data_str)) {
             VhostsService.stopVService(this);
             finish();
         }
@@ -141,7 +149,7 @@ public class VhostsActivity extends AppCompatActivity {
         try {
             Field f = android.provider.DocumentsContract.class.getField("EXTRA_SHOW_ADVANCED");
             intent.putExtra(f.get(f.getName()).toString(), true);
-        } catch (Throwable  e) {
+        } catch (Throwable e) {
             LogUtils.e(TAG, "SET EXTRA_SHOW_ADVANCED", e);
         }
 
@@ -164,20 +172,25 @@ public class VhostsActivity extends AppCompatActivity {
             onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null);
     }
 
-    private boolean checkHostUri() {
+    private int checkHostUri() {
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        String uri_path = settings.getString(HOSTS_URI, null);
-        if (uri_path != null) {
-            Uri uri = Uri.parse(uri_path);
+        if (settings.getBoolean(VhostsActivity.IS_LOCAL, true)) {
             try {
-                InputStream inputStream = getContentResolver().openInputStream(uri);
-                inputStream.close();
-                return true;
+                getContentResolver().openInputStream(Uri.parse(settings.getString(HOSTS_URI, null))).close();
+                return 1;
             } catch (Exception e) {
                 LogUtils.e(TAG, "HOSTS FILE NOT FOUND", e);
+                return -1;
+            }
+        } else {
+            try {
+                openFileInput(VhostsActivity.NET_HOST_FILE).close();
+                return 2;
+            } catch (Exception e) {
+                LogUtils.e(TAG, "NET HOSTS FILE NOT FOUND", e);
+                return -2;
             }
         }
-        return false;
     }
 
     private void setUriByPREFS(Intent intent) {
@@ -191,7 +204,7 @@ public class VhostsActivity extends AppCompatActivity {
             getContentResolver().takePersistableUriPermission(uri, takeFlags);
             editor.putString(HOSTS_URI, uri.toString());
             editor.apply();
-            if (checkHostUri()) {
+            if (checkHostUri() == 1) {
                 setButton(true);
                 setButton(false);
             } else {

@@ -11,8 +11,11 @@
     <string name="re_select_hosts">重新选择hosts文件</string>
     <string name="select_hosts">选择hosts文件</string>
     <string name="info">支持泛解析,示例:\nabc.com\nm.abc.com\nweb.abc.com\n=>.abc.com</string>
-    <string name="dialog_title"><font color="@color/primary_text">请选择Hosts文件</font></string>
-    <string name="dialog_message"><font color="@color/secondary_text">Hosts文件未选择或已经删除</font>
+    <string name="dialog_title">
+        <font color="@color/primary_text">请选择Hosts文件</font>
+    </string>
+    <string name="dialog_message">
+        <font color="@color/secondary_text">Hosts文件未选择或已经删除</font>
     </string>
     <string name="dialog_confirm">确定</string>
     <string name="dialog_cancel">取消</string>
@@ -34,4 +37,9 @@
     <string name="googleplay10">Google Play捐赠 10 $</string>
     <string name="bitcoin">比特币捐赠</string>
     <string name="tip_bitcoin">比特币地址已经复制到剪切板</string>
+    <string name="radio_local">来自本地</string>
+    <string name="radio_net">来自网络</string>
+    <string name="url_error">URL输入不正确</string>
+    <string name="down_success">下载成功，获取到 %d 条记录</string>
+    <string name="down_error">下载失败</string>
 </resources>
