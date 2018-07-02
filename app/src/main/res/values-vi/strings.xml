@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Virtual Hosts</string>
+    <string name="action_settings">Cài đặt</string>
+    <string name="update_button">Cập nhật</string>
+    <string name="update_hosts">Chọn ip cập nhật tập tin hosts</string>
+    <string name="clear_hosts">Xóa hosts</string>
+    <string name="load_hosts">Tải hosts</string>
+    <string name="backup_hosts">Sao lưu hosts</string>
+    <string name="start_vpn">Bắt đầu vpn</string>
+    <string name="stop_vpn">Dừng vpn</string>
+    <string name="re_select_hosts">Chọn lại tập tin hosts</string>
+    <string name="select_hosts">Chọn tập tin hosts</string>
+    <string name="info">"Hỗ trợ bản ghi DNS ký tự đại diện, Ví dụ:\nabc.com\nm.abc.com\nweb.abc.com\n=>.abc.com</string>
+    <string name="dialog_title">
+        <font color="@color/primary_text">Vui lòng chọn tập tin hosts</font>
+    </string>
+    <string name="dialog_message"><font color="@color/secondary_text">Tập tin hosts không được chọn hoặc đã bị xóa</font>
+    </string>
+    <string name="dialog_confirm">Xác nhận</string>
+    <string name="dialog_cancel">Hủy bỏ</string>
+    <string name="dns_server">8.8.8.8</string>
+    <string name="file_select_error">Lỗi! Trình duyệt tập tin hệ thống không tìm thấy</string>
+    <string name="permission_error">Lỗi! Không cho phép</string>
+    <string name="fab_label_boot">Mở khi khởi động máy</string>
+    <string name="fab_label_donation">Đóng góp</string>
+    <string name="welcome">"Sự hỗ trợ của bạn là động lực lớn nhất đối với chúng tôi.\nBạn có thể hỗ trợ chúng tôi thông
+        qua các cách sau."
+    </string>
+    <string name="rate">Đánh giá trên Google Play</string>
+    <string name="alipay">Đóng góp với Alipay</string>
+    <string name="wechat">Đóng góp với WeChat</string>
+    <string name="paypal">Đóng góp bằng Paypal</string>
+    <string name="googleplay">Đóng góp với Google Play</string>
+    <string name="googleplay10">Đóng góp $10 với Google Play</string>
+    <string name="googleplay2">Đóng góp $2 với Google Play</string>
+    <string name="googleplay4">Đóng góp $4 với Google Play</string>
+    <string name="googleplay6">Đóng góp $6 với Google Play</string>
+    <string name="googleplay8">Đóng góp $8 với Google Play</string>
+    <string name="bitcoin">Đóng góp bằng Bitcoin</string>
+    <string name="tip_bitcoin">Địa chỉ bitcoin có bản sao vào bộ nhớ tạm</string>
+    <string name="radio_local">Từ địa phương.</string>
+    <string name="radio_net">Từ Internet</string>
+    <string name="url_error">Nhập URL không đúng.</string>
+    <string name="down_success">Tải xuống thành công, nhận %d bản ghi máy chủ lưu trữ</string>
+    <string name="down_error">Tải xuống không thành công</string>
+</resources>
