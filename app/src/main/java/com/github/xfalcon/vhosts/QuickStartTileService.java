@@ -34,7 +34,7 @@ public class QuickStartTileService extends TileService {
             VhostsService.stopVService(this.getApplicationContext());
        } else if(state == Tile.STATE_INACTIVE){
             tile.setState(Tile.STATE_ACTIVE);
-            VhostsService.startVService(this.getApplicationContext());
+            VhostsService.startVService(this.getApplicationContext(),1);
         }else{
             tile.setState(Tile.STATE_UNAVAILABLE);
         }

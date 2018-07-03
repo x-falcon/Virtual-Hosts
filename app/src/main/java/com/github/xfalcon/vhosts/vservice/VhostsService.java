@@ -16,14 +16,16 @@
 
 package com.github.xfalcon.vhosts.vservice;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.VpnService;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.content.LocalBroadcastManager;
 import com.github.xfalcon.vhosts.NetworkReceiver;
@@ -70,12 +72,23 @@ public class VhostsService extends VpnService {
     private ReentrantLock udpSelectorLock;
     private ReentrantLock tcpSelectorLock;
     private NetworkReceiver netStateReceiver;
+    private static boolean isOAndBoot = false;
 
 
     @Override
     public void onCreate() {
 //        registerNetReceiver();
         super.onCreate();
+        if (isOAndBoot) {
+            //android 8.0 boot
+            NotificationChannel channel = new NotificationChannel("vhosts_channel_id", "System", NotificationManager.IMPORTANCE_MAX);
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.createNotificationChannel(channel);
+            Notification notification = new Notification.Builder(this, "vhosts_channel_id")
+                    .setSmallIcon(R.mipmap.ic_launcher)  // the status icon
+                    .build();
+            startForeground(1, notification);
+        }
         setupHostFile();
         setupVPN();
         if (vpnInterface == null) {
@@ -160,20 +173,20 @@ public class VhostsService extends VpnService {
 
     private void registerNetReceiver() {
         //wifi 4G state
-        IntentFilter filter = new IntentFilter();
+//        IntentFilter filter = new IntentFilter();
 //        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
 //        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        netStateReceiver = new NetworkReceiver();
-        registerReceiver(netStateReceiver, filter);
+//        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+//        netStateReceiver = new NetworkReceiver();
+//        registerReceiver(netStateReceiver, filter);
 
     }
 
     private void unregisterNetReceiver() {
-        if (netStateReceiver != null) {
-            unregisterReceiver(netStateReceiver);
-            netStateReceiver = null;
-        }
+//        if (netStateReceiver != null) {
+//            unregisterReceiver(netStateReceiver);
+//            netStateReceiver = null;
+//        }
     }
 
     @Override
@@ -192,7 +205,7 @@ public class VhostsService extends VpnService {
         return isRunning;
     }
 
-    public static void startVService(Context context) {
+    public static void startVService(Context context, int method) {
         Intent intent = VhostsService.prepare(context);
         if (intent != null) {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -200,7 +213,13 @@ public class VhostsService extends VpnService {
             LogUtils.e(TAG, "Run Fail On Boot");
         }
         try {
-            context.startService(new Intent(context, VhostsService.class).setAction(ACTION_CONNECT));
+            if (method == 2 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                isOAndBoot = true;
+                context.startForegroundService(new Intent(context, VhostsService.class).setAction(ACTION_CONNECT));
+            } else {
+                isOAndBoot = false;
+                context.startService(new Intent(context, VhostsService.class).setAction(ACTION_CONNECT));
+            }
         } catch (RuntimeException e) {
             LogUtils.e(TAG, "Not allowed to start service Intent", e);
         }

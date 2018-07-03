@@ -63,7 +63,7 @@ public class QuickStartWidget extends AppWidgetProvider {
                 VhostsService.stopVService(context);
                 views.setImageViewResource(R.id.imageButton, R.drawable.quick_start_off);
             } else {
-                VhostsService.startVService(context);
+                VhostsService.startVService(context,1);
                 views.setImageViewResource(R.id.imageButton, R.drawable.quick_start_on);
             }
         }

@@ -42,4 +42,5 @@
     <string name="url_error">URL輸入不正確</string>
     <string name="down_success">下載成功，獲取到 %d 條記錄</string>
     <string name="down_error">下載失敗</string>
+    <string name="runing_notice">Virtual Hosts 正在運行</string>
 </resources>

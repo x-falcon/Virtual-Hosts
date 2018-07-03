@@ -40,6 +40,7 @@ public class AdvanceActivity extends AppCompatActivity {
         final ProgressBar progressBar = findViewById(R.id.progressBar);
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         url_edit_text.setText(settings.getString(VhostsActivity.HOSTS_URL,"https://raw.githubusercontent.com/x-falcon/tools/master/hosts"));
+        url_edit_text.setSelection(4);
         boolean isLocal = settings.getBoolean(IS_LOCAL, true);
         if (isLocal) local_radio_button.setChecked(true);
         else net_radio_button.setChecked(true);

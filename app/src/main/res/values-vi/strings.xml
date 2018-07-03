@@ -44,4 +44,5 @@
     <string name="url_error">Nhập URL không đúng.</string>
     <string name="down_success">Tải xuống thành công, nhận %d bản ghi máy chủ lưu trữ</string>
     <string name="down_error">Tải xuống không thành công</string>
+    <string name="runing_notice">Virtual Hosts Đang chạy</string>
 </resources>

@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import com.github.xfalcon.vhosts.util.LogUtils;
 import com.github.xfalcon.vhosts.vservice.VhostsService;
 //use adb for test
 //am broadcast -a android.intent.action.BOOT_COMPLETED -p com.github.xfalcon.vhosts
@@ -46,7 +47,7 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (getEnabled(context)) {
             if(!VhostsService.isRunning()) {
-                VhostsService.startVService(context);
+                VhostsService.startVService(context,2);
             }
         }
     }

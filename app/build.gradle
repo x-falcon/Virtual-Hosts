@@ -7,22 +7,25 @@ android {
         applicationId "com.github.xfalcon.vhosts"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 30
-        versionName "2.0.1"
+        versionCode 31
+        versionName "2.0.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
+    productFlavors.all {
+        flavor -> flavor.manifestPlaceholders = [Market_CHANNEL_VALUE: name]
+    }
+    flavorDimensions "CHANNEL"
     productFlavors {
         GooglePlay {
+            dimension "CHANNEL"
             buildConfigField("boolean", "IS_GooglePlay", "true")
         }
         Github {
+            dimension "CHANNEL"
             buildConfigField("boolean", "IS_GooglePlay", "false")
         }
 
-    }
-    productFlavors.all {
-        flavor -> flavor.manifestPlaceholders = [Market_CHANNEL_VALUE: name]
     }
     buildTypes {
         release {
@@ -39,15 +42,15 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile files('libs/Baidu_Mtj_3.9.0.6.jar')
-    compile 'com.android.support:appcompat-v7:28.0.0-alpha3'
-    compile 'com.android.support:cardview-v7:28.0.0-alpha3'
-    compile 'com.android.support.constraint:constraint-layout:1.1.2'
-    compile 'com.github.zcweng:switch-button:0.0.3@aar'
-    compile 'com.github.clans:fab:1.6.4'
-    testCompile 'junit:junit:4.12'
+    implementation files('libs/Baidu_Mtj_3.9.0.6.jar')
+    implementation 'com.android.support:appcompat-v7:28.0.0-alpha3'
+    implementation 'com.android.support:cardview-v7:28.0.0-alpha3'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    implementation 'com.github.zcweng:switch-button:0.0.3@aar'
+    implementation 'com.github.clans:fab:1.6.4'
+    androidTestImplementation 'junit:junit:4.12'
 }

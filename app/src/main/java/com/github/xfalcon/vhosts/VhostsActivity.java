@@ -135,7 +135,7 @@ public class VhostsActivity extends AppCompatActivity {
         String data_str = uri.toString();
         if ("on".equals(data_str)) {
             if (!VhostsService.isRunning())
-                VhostsService.startVService(this);
+                VhostsService.startVService(this,1);
             finish();
         } else if ("off".equals(data_str)) {
             VhostsService.stopVService(this);
