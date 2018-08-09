@@ -108,13 +108,12 @@ public class DnsChange {
         String HOST_PATTERN_STR = "^\\s*(" + STR_COMMENT + "?)\\s*(\\S*)\\s*([^" + STR_COMMENT + "]*)" + STR_COMMENT + "?(.*)$";
         Pattern HOST_PATTERN = Pattern.compile(HOST_PATTERN_STR);
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    inputStream));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String line;
             DOMAINS_IP_MAPS4 = new ConcurrentHashMap<>();
             DOMAINS_IP_MAPS6 = new ConcurrentHashMap<>();
             while (!Thread.interrupted() && (line = reader.readLine()) != null) {
-                if (line.length() > 1000) continue;
+                if (line.length() > 1000 || line.startsWith(STR_COMMENT)) continue;
                 Matcher matcher = HOST_PATTERN.matcher(line);
                 if (matcher.find()) {
                     String ip = matcher.group(2).trim();
