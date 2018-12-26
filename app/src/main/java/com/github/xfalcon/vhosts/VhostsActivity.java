@@ -158,7 +158,12 @@ public class VhostsActivity extends AppCompatActivity {
             startActivityForResult(intent, SELECT_FILE_CODE);
         } catch (Exception e) {
             Toast.makeText(this, R.string.file_select_error, Toast.LENGTH_LONG).show();
-            LogUtils.e(TAG, "START SELECT_FILE_ACTIVE FAIL");
+            LogUtils.e(TAG, "START SELECT_FILE_ACTIVE FAIL",e);
+            SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putBoolean(IS_LOCAL, false);
+            editor.apply();
+            startActivity(new Intent(getApplicationContext(), AdvanceActivity.class));
         }
 
     }

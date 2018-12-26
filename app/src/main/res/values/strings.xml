@@ -20,8 +20,8 @@
     <string name="dialog_confirm">confirm</string>
     <string name="dialog_cancel">cancel</string>
     <string name="dns_server">8.8.8.8</string>
-    <string name="file_select_error">Error! System File Browser Not Find</string>
-    <string name="permission_error">Error! No Permission</string>
+    <string name="file_select_error">Error ! System File Browser Not Find, Will Use Url Mode</string>
+    <string name="permission_error">Error ! No Permission</string>
     <string name="fab_label_boot">On Startup</string>
     <string name="fab_label_donation">Donate</string>
     <string name="welcome">Your support is the greatest impetus for us.\nYou can support us through the following

@@ -20,7 +20,7 @@
     <string name="dialog_confirm">确定</string>
     <string name="dialog_cancel">取消</string>
     <string name="dns_server">114.114.114.114</string>
-    <string name="file_select_error">错误! 找不到系统文件浏览器</string>
+    <string name="file_select_error">错误 ! 找不到系统文件浏览器,将使用Url模式</string>
     <string name="permission_error">错误! 没有权限</string>
     <string name="fab_label_boot">开机启动</string>
     <string name="fab_label_donation">打赏</string>

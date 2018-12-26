@@ -20,7 +20,7 @@
     <string name="dialog_confirm">Xác nhận</string>
     <string name="dialog_cancel">Hủy bỏ</string>
     <string name="dns_server">8.8.8.8</string>
-    <string name="file_select_error">Lỗi! Trình duyệt tập tin hệ thống không tìm thấy</string>
+    <string name="file_select_error">Lỗi ! Trình duyệt tệp hệ thống không tìm thấy, sẽ sử dụng chế độ Url</string>
     <string name="permission_error">Lỗi! Không cho phép</string>
     <string name="fab_label_boot">Mở khi khởi động máy</string>
     <string name="fab_label_donation">Đóng góp</string>

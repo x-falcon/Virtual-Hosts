@@ -20,7 +20,7 @@
     <string name="dialog_confirm">確定</string>
     <string name="dialog_cancel">取消</string>
     <string name="dns_server">8.8.8.8</string>
-    <string name="file_select_error">錯誤！找不到系統檔案瀏覽器</string>
+    <string name="file_select_error">錯誤！ 系統文件瀏覽器找不到，將使用U\'r\'l模式</string>
     <string name="permission_error">錯誤！沒有許可權</string>
     <string name="fab_label_boot">開機啟動</string>
     <string name="fab_label_donation">打賞</string>

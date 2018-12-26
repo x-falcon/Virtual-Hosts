@@ -12,70 +12,67 @@
             android:text="URL"
             android:ems="10"
             android:id="@+id/url_edit_text"
-            android:gravity="start"
+            android:gravity="center"
             style="@android:style/Widget.EditText"
             android:textColor="@color/primary_text"
             android:layout_width="0dp" android:layout_height="wrap_content"
             android:singleLine="false"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="95dp" android:layout_marginBottom="42dp"
-            app:layout_constraintBottom_toTopOf="@+id/progressBar" app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginStart="8dp" android:layout_marginEnd="8dp"/>
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
+            app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="8dp" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/progressBar" app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintVertical_bias="0.695"/>
 
     <Button
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="59dp"
             android:paddingTop="20dp"
             android:paddingBottom="20dp"
             android:textSize="18sp"
             android:text="@string/dialog_confirm"
             android:id="@+id/confirm_button"
-            app:layout_constraintTop_toBottomOf="@+id/ln_radio_group"
-            android:layout_marginBottom="51dp" app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginStart="8dp" android:layout_marginEnd="8dp"/>
-    <RadioGroup android:layout_width="159dp" android:layout_height="wrap_content"
-                android:orientation="vertical"
+            android:layout_marginBottom="64dp"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp"
+            app:layout_constraintHorizontal_bias="0.0"/>
+    <RadioGroup android:layout_width="337dp" android:layout_height="41dp"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
                 android:id="@+id/ln_radio_group"
                 android:visibility="visible"
-                app:layout_constraintTop_toBottomOf="@+id/down_button"
-                android:layout_marginBottom="50dp" app:layout_constraintEnd_toEndOf="@+id/down_button"
-                app:layout_constraintBottom_toTopOf="@+id/confirm_button" app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintHorizontal_bias="0.713" app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent">
+                android:layout_marginBottom="52dp"
+                app:layout_constraintBottom_toTopOf="@+id/confirm_button" android:layout_marginEnd="8dp"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginStart="8dp" app:layout_constraintHorizontal_bias="0.516">
         <RadioButton
                 android:text="@string/radio_local"
-                android:layout_width="132dp"
-                android:layout_height="42dp"
-                tools:layout_editor_absoluteX="292dp" android:id="@+id/local_radio_button"
-                tools:text="@string/radio_local"
-                android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/editText"
-                android:layout_marginBottom="8dp" app:layout_constraintBottom_toTopOf="@+id/radioButton2"/>
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/local_radio_button"
+        />
         <RadioButton
                 android:text="@string/radio_net"
-                android:layout_width="134dp"
-                android:layout_height="42dp" tools:layout_editor_absoluteY="403dp"
-                tools:layout_editor_absoluteX="240dp" android:id="@+id/net_radio_button" tools:text="@string/radio_net"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:id="@+id/net_radio_button" tools:text="@string/radio_net"
         />
     </RadioGroup>
     <ImageButton
             android:layout_width="0dp"
-            android:layout_height="64dp" app:srcCompat="@android:drawable/stat_sys_download"
+            android:layout_height="59dp" app:srcCompat="@android:drawable/stat_sys_download"
             android:id="@+id/down_button"
-            app:layout_constraintTop_toBottomOf="@+id/progressBar" android:layout_marginBottom="19dp"
-            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintBottom_toTopOf="@+id/ln_radio_group"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintHorizontal_bias="0.0" app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginBottom="60dp"
+            app:layout_constraintBottom_toTopOf="@+id/ln_radio_group" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp" app:layout_constraintHorizontal_bias="0.0"/>
     <ProgressBar
             style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/progressBar"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@+id/url_edit_text" android:layout_marginBottom="15dp"
-            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintBottom_toTopOf="@+id/down_button"
-            app:layout_constraintStart_toStartOf="parent"/>
+            android:layout_marginBottom="24dp"
+            app:layout_constraintBottom_toTopOf="@+id/down_button" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp"/>
 </android.support.constraint.ConstraintLayout>
