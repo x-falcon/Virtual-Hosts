@@ -23,6 +23,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.Build;
@@ -81,13 +82,17 @@ public class VhostsService extends VpnService {
         super.onCreate();
         if (isOAndBoot) {
             //android 8.0 boot
-            NotificationChannel channel = new NotificationChannel("vhosts_channel_id", "System", NotificationManager.IMPORTANCE_MAX);
-            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            manager.createNotificationChannel(channel);
-            Notification notification = new Notification.Builder(this, "vhosts_channel_id")
-                    .setSmallIcon(R.mipmap.ic_launcher)  // the status icon
-                    .build();
-            startForeground(1, notification);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel("vhosts_channel_id", "System", NotificationManager.IMPORTANCE_NONE);
+                NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                manager.createNotificationChannel(channel);
+                Notification notification = new Notification.Builder(this, "vhosts_channel_id")
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle("Virtual Hosts Running")
+                        .build();
+                startForeground(1, notification);
+            }
+            isOAndBoot=false;
         }
         setupHostFile();
         setupVPN();
@@ -158,14 +163,16 @@ public class VhostsService extends VpnService {
 //            builder.addRoute(VPN_ROUTE6,0);
             builder.addDnsServer(VPN_DNS4);
             builder.addDnsServer(VPN_DNS6);
-            try {
-                builder.addDisallowedApplication("com.android.vending"); //white list play store
-                builder.addDisallowedApplication("com.google.android.apps.docs"); //white list google drive
-                builder.addDisallowedApplication("com.google.android.apps.photos"); //white list google photos
-                builder.addDisallowedApplication("com.google.android.gm"); //white list gmail
-                builder.addDisallowedApplication("com.google.android.apps.translate"); //white list translate
-            } catch (Throwable e) {
-                LogUtils.d(TAG, "sdk < 21", e);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                String[] whiteList = {"com.android.vending", "com.google.android.apps.docs", "com.google.android.apps.photos", "com.google.android.gm", "com.google.android.apps.translate"};
+                for (String white : whiteList) {
+                    try {
+                        builder.addDisallowedApplication(white);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        LogUtils.e(TAG, e.getMessage(), e);
+                    }
+
+                }
             }
             vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
         }

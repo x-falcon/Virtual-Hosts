@@ -147,8 +147,15 @@ public class VhostsActivity extends AppCompatActivity {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("*/*");
         try {
-            Field f = android.provider.DocumentsContract.class.getField("EXTRA_SHOW_ADVANCED");
-            intent.putExtra(f.get(f.getName()).toString(), true);
+            String SHOW_ADVANCED;
+            try {
+                Field f = android.provider.DocumentsContract.class.getField("EXTRA_SHOW_ADVANCED");
+                SHOW_ADVANCED = f.get(f.getName()).toString();
+            }catch (NoSuchFieldException e){
+                LogUtils.e(TAG,e.getMessage(),e);
+                SHOW_ADVANCED = "android.content.extra.SHOW_ADVANCED";
+            }
+            intent.putExtra(SHOW_ADVANCED, true);
         } catch (Throwable e) {
             LogUtils.e(TAG, "SET EXTRA_SHOW_ADVANCED", e);
         }
