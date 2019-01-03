@@ -25,7 +25,7 @@
 
     <Button
             android:layout_width="0dp"
-            android:layout_height="59dp"
+            android:layout_height="wrap_content"
             android:paddingTop="20dp"
             android:paddingBottom="20dp"
             android:textSize="18sp"
@@ -59,7 +59,7 @@
     </RadioGroup>
     <ImageButton
             android:layout_width="0dp"
-            android:layout_height="59dp" app:srcCompat="@android:drawable/stat_sys_download"
+            android:layout_height="64dp" app:srcCompat="@android:drawable/stat_sys_download"
             android:id="@+id/down_button"
             android:layout_marginBottom="60dp"
             app:layout_constraintBottom_toTopOf="@+id/ln_radio_group" app:layout_constraintEnd_toEndOf="parent"
