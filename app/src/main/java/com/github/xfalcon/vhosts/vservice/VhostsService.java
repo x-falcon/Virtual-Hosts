@@ -28,7 +28,7 @@ import android.net.Uri;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
-import android.support.v4.content.LocalBroadcastManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.github.xfalcon.vhosts.NetworkReceiver;
 import com.github.xfalcon.vhosts.R;
 import com.github.xfalcon.vhosts.VhostsActivity;

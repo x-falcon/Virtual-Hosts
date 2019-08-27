@@ -7,8 +7,8 @@ android {
         applicationId "com.github.xfalcon.vhosts"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 34
-        versionName "2.0.5"
+        versionCode 36
+        versionName "2.0.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -43,10 +43,13 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation files('libs/Baidu_Mtj_3.9.0.6.jar')
+
+    implementation 'com.google.firebase:firebase-core:17.0.1'
+//    implementation files('libs/Baidu_Mtj_3.9.0.6.jar')
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:cardview-v7:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation "androidx.constraintlayout:constraintlayout:1.1.3"
+//    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation 'com.github.zcweng:switch-button:0.0.3@aar'
     implementation 'com.github.clans:fab:1.6.4'
     testImplementation 'junit:junit:4.12'
@@ -54,3 +57,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
+
+apply plugin: 'com.google.gms.google-services'

@@ -21,16 +21,16 @@ package com.github.xfalcon.vhosts;
 import android.content.*;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-import com.baidu.mobstat.StatService;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.xfalcon.vhosts.util.LogUtils;
 import com.github.xfalcon.vhosts.vservice.VhostsService;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.suke.widget.SwitchButton;
 
 import java.lang.reflect.Field;
@@ -46,6 +46,7 @@ public class VhostsActivity extends AppCompatActivity {
     public static final String HOSTS_URI = "HOST_URI";
     public static final String NET_HOST_FILE = "net_hosts";
 
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     private boolean waitingForVPNStart;
 
@@ -63,7 +64,9 @@ public class VhostsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         launch();
-        StatService.autoTrace(this, true, false);
+//        StatService.autoTrace(this, true, false);
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
         setContentView(R.layout.activity_vhosts);
         LogUtils.context = getApplicationContext();
         final SwitchButton vpnButton = findViewById(R.id.button_start_vpn);
