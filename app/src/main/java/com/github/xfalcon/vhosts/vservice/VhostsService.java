@@ -33,6 +33,7 @@ import com.github.xfalcon.vhosts.NetworkReceiver;
 import com.github.xfalcon.vhosts.R;
 import com.github.xfalcon.vhosts.VhostsActivity;
 import com.github.xfalcon.vhosts.util.LogUtils;
+import org.xbill.DNS.Address;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -129,9 +130,8 @@ public class VhostsService extends VpnService {
 
 
     private void setupHostFile() {
-        SharedPreferences settings = getSharedPreferences(VhostsActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
         boolean is_local = settings.getBoolean(VhostsActivity.IS_LOCAL, true);
-
         String uri_path = settings.getString(VhostsActivity.HOSTS_URI, null);
         try {
             final InputStream inputStream;
@@ -155,7 +155,22 @@ public class VhostsService extends VpnService {
             Builder builder = new Builder();
             builder.addAddress(VPN_ADDRESS, 32);
             builder.addAddress(VPN_ADDRESS6, 128);
-            VPN_DNS4 = getString(R.string.dns_server);
+
+
+            SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
+            String VPN_DNS4_DEFAULT = getString(R.string.dns_server);
+            boolean is_cus_dns = settings.getBoolean(VhostsActivity.IS_CUS_DNS,false);
+            String VPN_DNS4=VPN_DNS4_DEFAULT;
+            if(is_cus_dns){
+                VPN_DNS4 = settings.getString(VhostsActivity.IPV4_DNS, VPN_DNS4_DEFAULT);
+                try {
+                    Address.getByAddress(VPN_DNS4);
+                } catch (Exception e) {
+                    VPN_DNS4=VPN_DNS4_DEFAULT;
+                    LogUtils.e(TAG, e.getMessage(), e);
+                }
+            }
+
             LogUtils.d(TAG, "use dns:" + VPN_DNS4);
             builder.addRoute(VPN_DNS4, 32);
             builder.addRoute(VPN_DNS6, 128);

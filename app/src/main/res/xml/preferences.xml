@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    >
+    <PreferenceCategory
+            android:title="@string/pref_ps_set_hosts_url">
+
+        <EditTextPreference
+                android:key="HOSTS_URL"
+                android:defaultValue="https://raw.githubusercontent.com/x-falcon/tools/master/hosts"
+                android:selectAllOnFocus="true"
+                android:summary="@string/pref_remote_hosts"
+                android:title="@string/title_pref_remote_hosts"/>
+    <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/pref_is_local" android:key="IS_LOCAL"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/pref_ps_set_cus_dns">
+    <EditTextPreference
+            android:defaultValue="8.8.8.8"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="@string/pref_dns" android:key="IPV4_DNS"/>
+    <CheckBoxPreference
+            android:defaultValue="false"
+            android:title="@string/pref_dns_title" android:key="IS_CUS_DNS"/>
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

@@ -45,4 +45,14 @@
     <string name="down_success">Download Success Get %d Host Records</string>
     <string name="down_error">Download Failed</string>
     <string name="runing_notice">Virtual Hosts Is Running</string>
+
+    <string name="pref_ps_set_hosts_url">set net hosts url</string>
+    <string name="pref_ps_set_cus_dns">set custom dns</string>
+
+    <string name="title_pref_remote_hosts">remote hosts url</string>
+    <string name="pref_remote_hosts">remote hosts url</string>
+    <string name="pref_is_local">is_local</string>
+    <string name="pref_dns">custom dns</string>
+    <string name="pref_dns_title">use custom dns</string>
+
 </resources>

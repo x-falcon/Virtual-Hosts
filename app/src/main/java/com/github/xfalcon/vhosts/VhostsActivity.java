@@ -45,6 +45,8 @@ public class VhostsActivity extends AppCompatActivity {
     public static final String HOSTS_URL = "HOSTS_URL";
     public static final String HOSTS_URI = "HOST_URI";
     public static final String NET_HOST_FILE = "net_hosts";
+    public static final String IPV4_DNS = "IPV4_DNS";
+    public static final String IS_CUS_DNS= "IS_CUS_DNS";
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
@@ -64,6 +66,10 @@ public class VhostsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         launch();
+
+        SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
+
+
 //        StatService.autoTrace(this, true, false);
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
@@ -116,8 +122,8 @@ public class VhostsActivity extends AppCompatActivity {
         selectHosts.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                startActivity(new Intent(getApplicationContext(), AdvanceActivity.class));
-
+//                startActivity(new Intent(getApplicationContext(), AdvanceActivity.class));
+                  startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
                 return false;
             }
         });
