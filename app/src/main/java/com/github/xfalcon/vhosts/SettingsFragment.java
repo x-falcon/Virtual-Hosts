@@ -25,10 +25,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.Gravity;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.*;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -70,35 +67,67 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         Preference urlCustomPref = findPreference(HOSTS_URL);
         Preference dnsCustomPref = findPreference(IPV4_DNS);
 
-        dnsCustomPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        dnsCustomPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
 
-            public boolean onPreferenceClick(Preference preference) {
-                String ipv4_dns = sharedPreferences.getString(IPV4_DNS, "");
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                String ipv4_dns = (String)newValue;
                 try {
                     Address.getByAddress(ipv4_dns);
                     return true;
                 } catch (Exception e) {
                     LogUtils.e(TAG, e.getMessage(), e);
-                    Toast.makeText(preference.getContext(), getString(R.string.url_error), Toast.LENGTH_LONG).show();
+                    Toast.makeText(preference.getContext(), getString(R.string.dns4_error), Toast.LENGTH_LONG).show();
                 }
                 return false;
             }
         });
 
-        urlCustomPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
-            public boolean onPreferenceClick(Preference preference) {
-                String url = sharedPreferences.getString(HOSTS_URL, "");
+//        dnsCustomPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+//
+//            public boolean onPreferenceClick(Preference preference) {
+//                String ipv4_dns = sharedPreferences.getString(IPV4_DNS, "");
+//                try {
+//                    Address.getByAddress(ipv4_dns);
+//                    return true;
+//                } catch (Exception e) {
+//                    LogUtils.e(TAG, e.getMessage(), e);
+//                    Toast.makeText(preference.getContext(), getString(R.string.url_error), Toast.LENGTH_LONG).show();
+//                }
+//                return false;
+//            }
+//        });
+
+        urlCustomPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                String url = (String)newValue;
                 if (isUrl(url)) {
                     setProgressDialog(preference.getContext(), url);
                     return true;
                 } else {
-                    Toast.makeText(preference.getContext(), getString(R.string.dns4_error), Toast.LENGTH_LONG).show();
+                    Toast.makeText(preference.getContext(), getString(R.string.url_error), Toast.LENGTH_LONG).show();
                     return false;
                 }
-
             }
         });
+
+//        urlCustomPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+//
+//            public boolean onPreferenceClick(Preference preference) {
+//                String url = sharedPreferences.getString(HOSTS_URL, "");
+//                if (isUrl(url)) {
+//                    setProgressDialog(preference.getContext(), url);
+//                    return true;
+//                } else {
+//                    Toast.makeText(preference.getContext(), getString(R.string.url_error), Toast.LENGTH_LONG).show();
+//                    return false;
+//                }
+//
+//            }
+//        });
     }
 
     public void setProgressDialog(final Context context, final String url) {
@@ -223,6 +252,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         super.onCreate(savedInstanceState);
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // create ContextThemeWrapper from the original Activity Context with the custom theme
+
+        // clone the inflater using the ContextThemeWrapper
+        inflater.getContext().setTheme(R.style.AppPreferenceSettingsFragmentTheme);
+
+        // inflate the layout using the cloned inflater, not default inflater
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override

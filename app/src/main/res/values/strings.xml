@@ -58,4 +58,7 @@
     <string name="pref_dns_title">use custom dns</string>
     <string name="download_alert">Downloading File...</string>
 
+    <string name="no_net_record">warning! net hosts file no dns record, please check</string>
+    <string name="no_local_record">warning! local hosts file no dns record, please check</string>
+
 </resources>

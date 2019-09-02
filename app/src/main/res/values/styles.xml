@@ -15,7 +15,12 @@
 
     <style name="AppPreferenceTheme" parent="AppTheme">
         <item name="android:textColor">@color/primary_text</item>
-        <item name="android:editTextColor">@color/primary_text</item>
+<!--        <item name="android:editTextColor">@color/primary_text</item>-->
+    </style>
+    <style name="AppPreferenceSettingsFragmentTheme" parent="@style/AppPreferenceTheme">
+
+        <item name="android:textColorPrimary">@color/primary_text</item>
+
     </style>
 
 </resources>

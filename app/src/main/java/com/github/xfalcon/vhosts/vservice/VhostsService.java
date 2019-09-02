@@ -27,7 +27,9 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.VpnService;
 import android.os.Build;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.widget.Toast;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.github.xfalcon.vhosts.NetworkReceiver;
 import com.github.xfalcon.vhosts.R;
@@ -94,7 +96,7 @@ public class VhostsService extends VpnService {
                         .build();
                 startForeground(1, notification);
             }
-            isOAndBoot=false;
+            isOAndBoot = false;
         }
         setupHostFile();
         setupVPN();
@@ -131,8 +133,8 @@ public class VhostsService extends VpnService {
 
 
     private void setupHostFile() {
-        SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
-        boolean is_net = settings.getBoolean(SettingsFragment.IS_NET, false);
+        SharedPreferences settings = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
+        final boolean is_net = settings.getBoolean(SettingsFragment.IS_NET, false);
         String uri_path = settings.getString(SettingsFragment.HOSTS_URI, null);
         try {
             final InputStream inputStream;
@@ -142,11 +144,24 @@ public class VhostsService extends VpnService {
                 inputStream = getContentResolver().openInputStream(Uri.parse(uri_path));
             new Thread() {
                 public void run() {
-                    DnsChange.handle_hosts(inputStream);
+                    if (DnsChange.handle_hosts(inputStream) == 0) {
+                        Looper.prepare();
+                        if(is_net){
+                            Toast.makeText(getApplicationContext(), R.string.no_net_record, Toast.LENGTH_LONG).show();
+                        }else{
+                            Toast.makeText(getApplicationContext(), R.string.no_local_record, Toast.LENGTH_LONG).show();
+                        }
+                        Looper.loop();
+                    }
                 }
             }.start();
 
         } catch (Exception e) {
+            if(is_net){
+                Toast.makeText(getApplicationContext(), R.string.no_net_record, Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(getApplicationContext(), R.string.no_local_record, Toast.LENGTH_LONG).show();
+            }
             LogUtils.e(TAG, "error setup host file service", e);
         }
     }
@@ -158,16 +173,16 @@ public class VhostsService extends VpnService {
             builder.addAddress(VPN_ADDRESS6, 128);
 
 
-            SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences settings = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
             String VPN_DNS4_DEFAULT = getString(R.string.dns_server);
-            boolean is_cus_dns = settings.getBoolean(SettingsFragment.IS_CUS_DNS,false);
-            String VPN_DNS4=VPN_DNS4_DEFAULT;
-            if(is_cus_dns){
+            boolean is_cus_dns = settings.getBoolean(SettingsFragment.IS_CUS_DNS, false);
+            String VPN_DNS4 = VPN_DNS4_DEFAULT;
+            if (is_cus_dns) {
                 VPN_DNS4 = settings.getString(SettingsFragment.IPV4_DNS, VPN_DNS4_DEFAULT);
                 try {
                     Address.getByAddress(VPN_DNS4);
                 } catch (Exception e) {
-                    VPN_DNS4=VPN_DNS4_DEFAULT;
+                    VPN_DNS4 = VPN_DNS4_DEFAULT;
                     LogUtils.e(TAG, e.getMessage(), e);
                 }
             }

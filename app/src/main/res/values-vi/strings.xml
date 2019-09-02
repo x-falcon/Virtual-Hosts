@@ -57,4 +57,7 @@
     <string name="fab_label_setting">Cài đặt</string>
     <string name="dns4_error">Nhập DNS không đúng.</string>
     <string name="download_alert">Đang tải xuống tập tin ...</string>
+
+    <string name = "no_net_record">cảnh báo! tệp lưu trữ mạng không có bản ghi dns, vui lòng kiểm tra</string>
+    <string name = "no_local_record">cảnh báo! tệp máy chủ cục bộ không có bản ghi dns, vui lòng kiểm tra</string>
 </resources>

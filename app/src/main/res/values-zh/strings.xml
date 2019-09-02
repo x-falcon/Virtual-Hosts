@@ -53,4 +53,7 @@
     <string name="pref_is_net">使用远程Hosts文件</string>
     <string name="dns4_error">DNS 输入不正确</string>
     <string name="download_alert">正在下载文件...</string>
+
+    <string name="no_net_record">提示! 网络文件不存在DNS记录,请检查</string>
+    <string name="no_local_record">提示! 本地文件不存在DNS记录,请检查</string>
 </resources>

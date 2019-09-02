@@ -219,12 +219,21 @@ public class VhostsActivity extends AppCompatActivity {
             getContentResolver().takePersistableUriPermission(uri, takeFlags);
             editor.putString(SettingsFragment.HOSTS_URI, uri.toString());
             editor.apply();
-            if (checkHostUri() == 1) {
-                setButton(true);
-                setButton(false);
-            } else {
-                Toast.makeText(this, R.string.permission_error, Toast.LENGTH_LONG).show();
+            switch (checkHostUri()){
+                case 1:{
+                    setButton(true);
+                    setButton(false);
+                    break;
+                }case -1:{
+                    Toast.makeText(this, R.string.permission_error, Toast.LENGTH_LONG).show();
+                    break;
+                }case 2:{
+                    break;
+                }case -2:{
+                    break;
+                }
             }
+
 
         } catch (Exception e) {
             LogUtils.e(TAG, "permission error", e);
