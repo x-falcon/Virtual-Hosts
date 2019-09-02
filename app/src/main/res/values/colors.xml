@@ -14,5 +14,7 @@
     <color name="fb_yellowPressed">#FBC02D</color>
     <color name="fab_redNormal">#F44336</color>
     <color name="fb_redPressed">#d32f2f</color>
+    <color name="fab_blackNormal">#29DDD6</color>
+    <color name="fb_blackPressed">#28B9B3</color>
     <color name="ic_launcher_background">#2ecc71</color>
 </resources>

@@ -43,4 +43,13 @@
     <string name="down_success">下載成功，獲取到 %d 條記錄</string>
     <string name="down_error">下載失敗</string>
     <string name="runing_notice">Virtual Hosts 正在運行</string>
+
+    <string name="pref_ps_set_hosts_url">設置網絡hosts url</string>
+    <string name="pref_ps_set_cus_dns">設置自定義DNS</string>
+    <string name="title_pref_remote_hosts">遠程Hosts地址</string>
+    <string name="pref_remote_hosts">遠程Hosts地址</string>
+    <string name="pref_dns">自定義DNS</string>
+    <string name="pref_dns_title">使用自定義DNS</string>
+    <string name="fab_label_setting">設置</string>
+    <string name="pref_is_net">使用遠程Hosts文件</string>
 </resources>

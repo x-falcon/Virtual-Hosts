@@ -31,6 +31,7 @@ import android.os.ParcelFileDescriptor;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.github.xfalcon.vhosts.NetworkReceiver;
 import com.github.xfalcon.vhosts.R;
+import com.github.xfalcon.vhosts.SettingsFragment;
 import com.github.xfalcon.vhosts.VhostsActivity;
 import com.github.xfalcon.vhosts.util.LogUtils;
 import org.xbill.DNS.Address;
@@ -131,14 +132,14 @@ public class VhostsService extends VpnService {
 
     private void setupHostFile() {
         SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
-        boolean is_local = settings.getBoolean(VhostsActivity.IS_LOCAL, true);
-        String uri_path = settings.getString(VhostsActivity.HOSTS_URI, null);
+        boolean is_net = settings.getBoolean(SettingsFragment.IS_NET, false);
+        String uri_path = settings.getString(SettingsFragment.HOSTS_URI, null);
         try {
             final InputStream inputStream;
-            if (is_local)
+            if (is_net)
+                inputStream = openFileInput(SettingsFragment.NET_HOST_FILE);
+            else
                 inputStream = getContentResolver().openInputStream(Uri.parse(uri_path));
-            else inputStream = openFileInput(VhostsActivity.NET_HOST_FILE);
-
             new Thread() {
                 public void run() {
                     DnsChange.handle_hosts(inputStream);
@@ -159,10 +160,10 @@ public class VhostsService extends VpnService {
 
             SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
             String VPN_DNS4_DEFAULT = getString(R.string.dns_server);
-            boolean is_cus_dns = settings.getBoolean(VhostsActivity.IS_CUS_DNS,false);
+            boolean is_cus_dns = settings.getBoolean(SettingsFragment.IS_CUS_DNS,false);
             String VPN_DNS4=VPN_DNS4_DEFAULT;
             if(is_cus_dns){
-                VPN_DNS4 = settings.getString(VhostsActivity.IPV4_DNS, VPN_DNS4_DEFAULT);
+                VPN_DNS4 = settings.getString(SettingsFragment.IPV4_DNS, VPN_DNS4_DEFAULT);
                 try {
                     Address.getByAddress(VPN_DNS4);
                 } catch (Exception e) {

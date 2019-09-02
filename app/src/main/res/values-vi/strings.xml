@@ -45,4 +45,14 @@
     <string name="down_success">Tải xuống thành công, nhận %d bản ghi máy chủ lưu trữ</string>
     <string name="down_error">Tải xuống không thành công</string>
     <string name="runing_notice">Virtual Hosts Đang chạy</string>
+
+    <string name = "pref_ps_set_hosts_url">đặt url máy chủ mạng</string>
+    <string name = "pref_ps_set_cus_dns">đặt dns tùy chỉnh</string>
+
+    <string name = "title_pref_remote_hosts">url máy chủ từ xa</string>
+    <string name = "pref_remote_hosts">url máy chủ từ xa</string>
+    <string name = "pref_is_net">sử dụng máy chủ mạng</string>
+    <string name = "pref_dns">dns tùy chỉnh</string>
+    <string name = "pref_dns_title">sử dụng dns tùy chỉnh</string>
+    <string name="fab_label_setting">Cài đặt</string>
 </resources>

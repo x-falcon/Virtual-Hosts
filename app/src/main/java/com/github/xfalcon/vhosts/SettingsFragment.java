@@ -19,84 +19,128 @@
 package com.github.xfalcon.vhosts;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.*;
+import android.widget.*;
 import androidx.preference.*;
-
+import com.github.xfalcon.vhosts.util.FileUtils;
+import com.github.xfalcon.vhosts.util.HttpUtils;
+import com.github.xfalcon.vhosts.util.LogUtils;
+import com.github.xfalcon.vhosts.vservice.DnsChange;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements
         SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private static String TAG = SettingsFragment.class.getName();
+
+    public static final int VPN_REQUEST_CODE = 0x0F;
+    public static final int SELECT_FILE_CODE = 0x05;
+    public static final String PREFS_NAME = SettingsFragment.class.getName();
+    public static final String IS_NET = "IS_NET";
+    public static final String HOSTS_URL = "HOSTS_URL";
+    public static final String HOSTS_URI = "HOST_URI";
+    public static final String NET_HOST_FILE = "net_hosts";
+    public static final String IPV4_DNS = "IPV4_DNS";
+    public static final String IS_CUS_DNS= "IS_CUS_DNS";
+
+    private Handler handler=null;
 
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.preferences, rootKey);
-        SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences();
+        final SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences();
         PreferenceScreen prefScreen = getPreferenceScreen();
         handeleSummary(prefScreen, sharedPreferences);
-        Preference yourCustomPref = (Preference) findPreference(VhostsActivity.HOSTS_URL);
+        Preference yourCustomPref = (Preference) findPreference(HOSTS_URL);
         yourCustomPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
-
-
-                buildDialog(preference.getContext()).show();
+                String url = sharedPreferences.getString(HOSTS_URL,"");
+                setProgressDialog(preference.getContext(),url);
 
                 return true;
             }
         });
     }
-    public AlertDialog.Builder buildDialog(final Context c) {
+    public void setProgressDialog(final Context context, final String url) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(c);
-        builder.setTitle("EditText Dialog");
-        builder.setMessage("Enter text:");
+        int llPadding = 30;
+        LinearLayout ll = new LinearLayout(context);
+        ll.setOrientation(LinearLayout.HORIZONTAL);
+        ll.setPadding(llPadding, llPadding, llPadding, llPadding);
+        ll.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams llParam = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT);
+        llParam.gravity = Gravity.CENTER;
+        ll.setLayoutParams(llParam);
 
-        LinearLayout llV = new LinearLayout(c);
-        llV.setOrientation(1); // 1 = vertical
+        ProgressBar progressBar = new ProgressBar(context);
+        progressBar.setIndeterminate(true);
+        progressBar.setPadding(0, 0, llPadding, 0);
+        progressBar.setLayoutParams(llParam);
 
-        final EditText patName = new EditText(c);
-        patName.setHint("Enter text...");
+        llParam = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        llParam.gravity = Gravity.CENTER;
+        TextView tvText = new TextView(context);
+        tvText.setText("Download ...");
+        tvText.setTextColor(Color.parseColor("#000000"));
+        tvText.setTextSize(20);
+        tvText.setLayoutParams(llParam);
 
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
-        lp.bottomMargin = 20;
-        lp.rightMargin = 30;
-        lp.leftMargin = 15;
+        ll.addView(progressBar);
+        ll.addView(tvText);
 
-        patName.setLayoutParams(lp);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setCancelable(true);
+        builder.setView(ll);
 
-        llV.addView(patName);
+        final AlertDialog dialog = builder.create();
+        Window window = dialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+            layoutParams.copyFrom(dialog.getWindow().getAttributes());
+            layoutParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
+            layoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+            dialog.getWindow().setAttributes(layoutParams);
+        }
+        handler=new Handler();
 
-        builder.setView(llV);
-
-        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-
+        new Thread(new Runnable() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                if(patName.getText().toString().length() > 0) {
-
-                } else {
-
+            public void run() {
+                try {
+                    Looper.prepare();
+                    String result = HttpUtils.get(url);
+                    FileUtils.writeFile(context.openFileOutput(NET_HOST_FILE, Context.MODE_PRIVATE), result);
+                    Toast.makeText(context, String.format(getString(R.string.down_success), DnsChange.handle_hosts(context.openFileInput(NET_HOST_FILE))), Toast.LENGTH_LONG).show();
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            dialog.hide();
+                        }
+                    });
+                    Looper.loop();
+                } catch (Exception e) {
+                    Toast.makeText(context, getString(R.string.down_error), Toast.LENGTH_LONG).show();
+                    LogUtils.e(TAG, e.getMessage(), e);
                 }
+
             }
-        });
+        }).start();
+        dialog.show();
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                dialog.dismiss();
-            }
-        });
-
-        return builder;
     }
+
     private void handeleSummary(PreferenceGroup preferenceGroup, SharedPreferences sharedPreferences) {
         int count = preferenceGroup.getPreferenceCount();
 

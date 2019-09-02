@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
-import com.github.xfalcon.vhosts.util.LogUtils;
 import com.github.xfalcon.vhosts.vservice.VhostsService;
 //use adb for test
 //am broadcast -a android.intent.action.BOOT_COMPLETED -p com.github.xfalcon.vhosts
@@ -32,14 +31,14 @@ public class BootReceiver extends BroadcastReceiver {
     public static final String RECONNECT_ON_REBOOT = "RECONNECT_ON_REBOOT";
 
     public static void setEnabled(Context context,Boolean enabled){
-        SharedPreferences settings = context.getSharedPreferences(VhostsActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean(RECONNECT_ON_REBOOT, enabled);
         editor.apply();
     }
 
     public static boolean getEnabled(Context context){
-        SharedPreferences settings = context.getSharedPreferences(VhostsActivity.PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(context);
         return settings.getBoolean(RECONNECT_ON_REBOOT, false);
     }
 

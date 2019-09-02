@@ -13,7 +13,7 @@
                 android:title="@string/title_pref_remote_hosts"/>
     <CheckBoxPreference
             android:defaultValue="false"
-            android:title="@string/pref_is_local" android:key="IS_LOCAL"/>
+            android:title="@string/pref_is_net" android:key="IS_NET"/>
     </PreferenceCategory>
 
     <PreferenceCategory

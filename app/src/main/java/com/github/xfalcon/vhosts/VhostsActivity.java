@@ -38,15 +38,6 @@ import java.lang.reflect.Field;
 public class VhostsActivity extends AppCompatActivity {
 
     private static final String TAG = VhostsActivity.class.getSimpleName();
-    private static final int VPN_REQUEST_CODE = 0x0F;
-    private static final int SELECT_FILE_CODE = 0x05;
-    public static final String PREFS_NAME = VhostsActivity.class.getName();
-    public static final String IS_LOCAL = "IS_LOCAL";
-    public static final String HOSTS_URL = "HOSTS_URL";
-    public static final String HOSTS_URI = "HOST_URI";
-    public static final String NET_HOST_FILE = "net_hosts";
-    public static final String IPV4_DNS = "IPV4_DNS";
-    public static final String IS_CUS_DNS= "IS_CUS_DNS";
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
@@ -67,9 +58,6 @@ public class VhostsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         launch();
 
-        SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
-
-
 //        StatService.autoTrace(this, true, false);
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
@@ -78,8 +66,10 @@ public class VhostsActivity extends AppCompatActivity {
         final SwitchButton vpnButton = findViewById(R.id.button_start_vpn);
 
         final Button selectHosts = findViewById(R.id.button_select_hosts);
+        final FloatingActionButton fab_setting = findViewById(R.id.fab_setting);
         final FloatingActionButton fab_boot = findViewById(R.id.fab_boot);
         final FloatingActionButton fab_donation = findViewById(R.id.fab_donation);
+
         if (checkHostUri() == -1) {
             selectHosts.setText(getString(R.string.select_hosts));
         }
@@ -100,7 +90,12 @@ public class VhostsActivity extends AppCompatActivity {
                 }
             }
         });
-
+        fab_setting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+            }
+        });
         fab_boot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,7 +117,6 @@ public class VhostsActivity extends AppCompatActivity {
         selectHosts.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-//                startActivity(new Intent(getApplicationContext(), AdvanceActivity.class));
                   startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
                 return false;
             }
@@ -171,15 +165,15 @@ public class VhostsActivity extends AppCompatActivity {
 
         try {
             intent.addCategory(Intent.CATEGORY_OPENABLE);
-            startActivityForResult(intent, SELECT_FILE_CODE);
+            startActivityForResult(intent, SettingsFragment.SELECT_FILE_CODE);
         } catch (Exception e) {
             Toast.makeText(this, R.string.file_select_error, Toast.LENGTH_LONG).show();
             LogUtils.e(TAG, "START SELECT_FILE_ACTIVE FAIL",e);
-            SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            SharedPreferences settings = getSharedPreferences(SettingsFragment.PREFS_NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = settings.edit();
-            editor.putBoolean(IS_LOCAL, false);
+            editor.putBoolean(SettingsFragment.IS_NET, true);
             editor.apply();
-            startActivity(new Intent(getApplicationContext(), AdvanceActivity.class));
+            startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
         }
 
     }
@@ -188,34 +182,34 @@ public class VhostsActivity extends AppCompatActivity {
         waitingForVPNStart = false;
         Intent vpnIntent = VhostsService.prepare(this);
         if (vpnIntent != null)
-            startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
+            startActivityForResult(vpnIntent, SettingsFragment.VPN_REQUEST_CODE);
         else
-            onActivityResult(VPN_REQUEST_CODE, RESULT_OK, null);
+            onActivityResult(SettingsFragment.VPN_REQUEST_CODE, RESULT_OK, null);
     }
 
     private int checkHostUri() {
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        if (settings.getBoolean(VhostsActivity.IS_LOCAL, true)) {
+        SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
+        if (settings.getBoolean(SettingsFragment.IS_NET, false)) {
             try {
-                getContentResolver().openInputStream(Uri.parse(settings.getString(HOSTS_URI, null))).close();
-                return 1;
-            } catch (Exception e) {
-                LogUtils.e(TAG, "HOSTS FILE NOT FOUND", e);
-                return -1;
-            }
-        } else {
-            try {
-                openFileInput(VhostsActivity.NET_HOST_FILE).close();
+                openFileInput(SettingsFragment.NET_HOST_FILE).close();
                 return 2;
             } catch (Exception e) {
                 LogUtils.e(TAG, "NET HOSTS FILE NOT FOUND", e);
                 return -2;
             }
+        } else {
+            try {
+                getContentResolver().openInputStream(Uri.parse(settings.getString(SettingsFragment.HOSTS_URI, null))).close();
+                return 1;
+            } catch (Exception e) {
+                LogUtils.e(TAG, "HOSTS FILE NOT FOUND", e);
+                return -1;
+            }
         }
     }
 
     private void setUriByPREFS(Intent intent) {
-        SharedPreferences settings = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         Uri uri = intent.getData();
         final int takeFlags = intent.getFlags()
@@ -223,7 +217,7 @@ public class VhostsActivity extends AppCompatActivity {
                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         try {
             getContentResolver().takePersistableUriPermission(uri, takeFlags);
-            editor.putString(HOSTS_URI, uri.toString());
+            editor.putString(SettingsFragment.HOSTS_URI, uri.toString());
             editor.apply();
             if (checkHostUri() == 1) {
                 setButton(true);
@@ -247,11 +241,11 @@ public class VhostsActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == SettingsFragment.VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             waitingForVPNStart = true;
             startService(new Intent(this, VhostsService.class).setAction(VhostsService.ACTION_CONNECT));
             setButton(false);
-        } else if (requestCode == SELECT_FILE_CODE && resultCode == RESULT_OK) {
+        } else if (requestCode == SettingsFragment.SELECT_FILE_CODE && resultCode == RESULT_OK) {
             setUriByPREFS(data);
         }
     }

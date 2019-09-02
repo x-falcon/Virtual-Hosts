@@ -111,8 +111,7 @@
 
         <activity android:name=".DonationActivity">
         </activity>
-        <activity android:name=".AdvanceActivity">
-        </activity>
+
         <activity android:name=".SettingsActivity"
                   android:label="Settings"
                   android:parentActivityName=".VhostsActivity">
