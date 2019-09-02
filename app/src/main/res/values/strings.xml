@@ -43,6 +43,7 @@
     <string name="radio_local">from local</string>
     <string name="radio_net">from internet</string>
     <string name="url_error">URL input is incorrect</string>
+    <string name="dns4_error">DNS input is incorrect</string>
     <string name="down_success">Download Success Get %d Host Records</string>
     <string name="down_error">Download Failed</string>
     <string name="runing_notice">Virtual Hosts Is Running</string>
@@ -55,5 +56,6 @@
     <string name="pref_is_net">use net hosts</string>
     <string name="pref_dns">custom dns</string>
     <string name="pref_dns_title">use custom dns</string>
+    <string name="download_alert">Downloading File...</string>
 
 </resources>

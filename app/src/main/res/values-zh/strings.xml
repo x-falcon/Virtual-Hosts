@@ -51,4 +51,6 @@
     <string name="pref_dns_title">使用自定义DNS</string>
     <string name="fab_label_setting">设置</string>
     <string name="pref_is_net">使用远程Hosts文件</string>
+    <string name="dns4_error">DNS 输入不正确</string>
+    <string name="download_alert">正在下载文件...</string>
 </resources>

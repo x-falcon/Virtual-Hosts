@@ -19,21 +19,29 @@
 package com.github.xfalcon.vhosts;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.*;
-import android.widget.*;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 import androidx.preference.*;
 import com.github.xfalcon.vhosts.util.FileUtils;
 import com.github.xfalcon.vhosts.util.HttpUtils;
 import com.github.xfalcon.vhosts.util.LogUtils;
 import com.github.xfalcon.vhosts.vservice.DnsChange;
+import org.xbill.DNS.Address;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements
         SharedPreferences.OnSharedPreferenceChangeListener {
@@ -48,9 +56,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
     public static final String HOSTS_URI = "HOST_URI";
     public static final String NET_HOST_FILE = "net_hosts";
     public static final String IPV4_DNS = "IPV4_DNS";
-    public static final String IS_CUS_DNS= "IS_CUS_DNS";
+    public static final String IS_CUS_DNS = "IS_CUS_DNS";
 
-    private Handler handler=null;
+    private Handler handler = null;
 
 
     @Override
@@ -59,17 +67,40 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         final SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences();
         PreferenceScreen prefScreen = getPreferenceScreen();
         handeleSummary(prefScreen, sharedPreferences);
-        Preference yourCustomPref = (Preference) findPreference(HOSTS_URL);
-        yourCustomPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        Preference urlCustomPref = findPreference(HOSTS_URL);
+        Preference dnsCustomPref = findPreference(IPV4_DNS);
+
+        dnsCustomPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
-                String url = sharedPreferences.getString(HOSTS_URL,"");
-                setProgressDialog(preference.getContext(),url);
+                String ipv4_dns = sharedPreferences.getString(IPV4_DNS, "");
+                try {
+                    Address.getByAddress(ipv4_dns);
+                    return true;
+                } catch (Exception e) {
+                    LogUtils.e(TAG, e.getMessage(), e);
+                    Toast.makeText(preference.getContext(), getString(R.string.url_error), Toast.LENGTH_LONG).show();
+                }
+                return false;
+            }
+        });
 
-                return true;
+        urlCustomPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+            public boolean onPreferenceClick(Preference preference) {
+                String url = sharedPreferences.getString(HOSTS_URL, "");
+                if (isUrl(url)) {
+                    setProgressDialog(preference.getContext(), url);
+                    return true;
+                } else {
+                    Toast.makeText(preference.getContext(), getString(R.string.dns4_error), Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
             }
         });
     }
+
     public void setProgressDialog(final Context context, final String url) {
 
         int llPadding = 30;
@@ -92,7 +123,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         llParam.gravity = Gravity.CENTER;
         TextView tvText = new TextView(context);
-        tvText.setText("Download ...");
+        tvText.setText(getString(R.string.download_alert));
         tvText.setTextColor(Color.parseColor("#000000"));
         tvText.setTextSize(20);
         tvText.setLayoutParams(llParam);
@@ -113,7 +144,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
             layoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT;
             dialog.getWindow().setAttributes(layoutParams);
         }
-        handler=new Handler();
+        handler = new Handler();
 
         new Thread(new Runnable() {
             @Override
@@ -168,6 +199,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         }
     }
 
+    public boolean isUrl(String str) {
+        String regex = "http(s)?://([\\w-]+\\.)+[\\w-]+(/[\\w- ./?%&=]*)?";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(str);
+        return matcher.matches();
+    }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,

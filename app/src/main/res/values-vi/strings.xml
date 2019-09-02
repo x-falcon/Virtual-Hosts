@@ -55,4 +55,6 @@
     <string name = "pref_dns">dns tùy chỉnh</string>
     <string name = "pref_dns_title">sử dụng dns tùy chỉnh</string>
     <string name="fab_label_setting">Cài đặt</string>
+    <string name="dns4_error">Nhập DNS không đúng.</string>
+    <string name="download_alert">Đang tải xuống tập tin ...</string>
 </resources>
