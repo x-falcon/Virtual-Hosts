@@ -45,4 +45,5 @@
     <string name="down_success">Download Success Get %d Host Records</string>
     <string name="down_error">Download Failed</string>
     <string name="runing_notice">Virtual Hosts Is Running</string>
+    <string name="fab_label_settings">Settings</string>
 </resources>

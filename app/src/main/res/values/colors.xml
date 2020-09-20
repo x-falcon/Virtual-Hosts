@@ -15,4 +15,6 @@
     <color name="fab_redNormal">#F44336</color>
     <color name="fb_redPressed">#d32f2f</color>
     <color name="ic_launcher_background">#2ecc71</color>
+    <color name="fab_grayNormal">#CCCCCC</color>
+    <color name="fab_grayPressed">#999999</color>
 </resources>

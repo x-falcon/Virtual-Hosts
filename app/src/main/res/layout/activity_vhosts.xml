@@ -58,6 +58,15 @@
             app:layout_constraintRight_toRightOf="parent" android:layout_marginEnd="16dp">
 
         <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@android:drawable/ic_menu_preferences"
+            app:fab_colorNormal="@color/fab_grayNormal"
+            app:fab_colorPressed="@color/fab_grayPressed"
+            app:fab_label="@string/fab_label_settings"/>
+
+        <com.github.clans.fab.FloatingActionButton
                 android:id="@+id/fab_boot"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
