@@ -9,7 +9,7 @@
 
     <EditText
             android:inputType="textUri"
-            android:text="URL"
+            android:text="@string/url"
             android:ems="10"
             android:id="@+id/url_edit_text"
             android:gravity="center"
