@@ -1,10 +1,13 @@
 package com.github.xfalcon.vhosts;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceFragmentCompat;
+
+import com.github.xfalcon.vhosts.vservice.VhostsService;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -20,6 +23,14 @@ public class SettingsActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+    }
+
+    protected void onStop() {
+        super.onStop();
+        // todo: stop service if changes in settings require it.
+        if (VhostsService.isRunning())
+            startService(new Intent(this, VhostsService.class).setAction(VhostsService.ACTION_DISCONNECT));
+
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {

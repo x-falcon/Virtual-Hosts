@@ -28,9 +28,12 @@ import android.net.Uri;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.PreferenceManager;
 
+import com.github.xfalcon.vhosts.DnsServersDetector;
 import com.github.xfalcon.vhosts.NetworkReceiver;
 import com.github.xfalcon.vhosts.R;
 import com.github.xfalcon.vhosts.VhostsActivity;
@@ -157,8 +160,26 @@ public class VhostsService extends VpnService {
             Builder builder = new Builder();
             builder.addAddress(VPN_ADDRESS, 32);
             builder.addAddress(VPN_ADDRESS6, 128);
-            VPN_DNS4 = getString(R.string.dns_server);
+
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            String server = sharedPreferences.getString("server", "google");
+            if (server.equals("google")) {
+                VPN_DNS4 = getString(R.string.dns_server);
+            } else {
+                DnsServersDetector dnsServersDetector = new DnsServersDetector(this);
+                String [] dnsServers = dnsServersDetector.getServers();
+                if (dnsServers != null) {
+                    for (String dnsServer : dnsServers) {
+                        if (dnsServer.contains(":")) {
+                            VPN_DNS6 = dnsServer;
+                        } else {
+                            VPN_DNS4 = dnsServer;
+                        }
+                    }
+                }
+            }
             LogUtils.d(TAG, "use dns:" + VPN_DNS4);
+
             builder.addRoute(VPN_DNS4, 32);
             builder.addRoute(VPN_DNS6, 128);
 //            builder.addRoute(VPN_ROUTE,0);

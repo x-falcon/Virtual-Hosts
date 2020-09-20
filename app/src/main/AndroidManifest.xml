@@ -35,7 +35,7 @@
         <activity
             android:name=".SettingsActivity"
             android:parentActivityName=".VhostsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/title_activity_settings"/>
         <activity android:name=".VhostsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -100,8 +100,8 @@
                 android:resource="@xml/quick_start_widget_info" />
         </receiver>
 
-        <activity android:name=".DonationActivity"></activity>
-        <activity android:name=".AdvanceActivity"></activity>
+        <activity android:name=".DonationActivity"/>
+        <activity android:name=".AdvanceActivity"/>
     </application>
 
 </manifest>
