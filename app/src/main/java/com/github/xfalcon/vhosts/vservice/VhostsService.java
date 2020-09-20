@@ -172,7 +172,7 @@ public class VhostsService extends VpnService {
 
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
             String server = sharedPreferences.getString("server", "google");
-            if (server.equals("google")) {
+            if ((server == null) || (server.equals("google"))) {
                 VPN_DNS4 = getString(R.string.dns_server);
             } else {
                 DnsServersDetector dnsServersDetector = new DnsServersDetector(this);
