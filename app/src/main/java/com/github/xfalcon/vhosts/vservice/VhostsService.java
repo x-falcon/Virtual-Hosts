@@ -26,8 +26,11 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.VpnService;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -40,6 +43,7 @@ import com.github.xfalcon.vhosts.VhostsActivity;
 import com.github.xfalcon.vhosts.util.LogUtils;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.Selector;
@@ -80,6 +84,11 @@ public class VhostsService extends VpnService {
     private NetworkReceiver netStateReceiver;
     private static boolean isOAndBoot = false;
 
+    // Network Service Discovery
+    private static final String SERVICE_TYPE = "_workstation._tcp.";
+    private NsdManager nsdManager;
+    private NsdManager.DiscoveryListener discoveryListener;
+    private NsdManager.ResolveListener resolveListener;
 
     @Override
     public void onCreate() {
@@ -101,6 +110,7 @@ public class VhostsService extends VpnService {
         }
         setupHostFile();
         setupVPN();
+        setupNsd();
         if (vpnInterface == null) {
             LogUtils.d(TAG, "unknow error");
             stopVService();
@@ -131,7 +141,6 @@ public class VhostsService extends VpnService {
             stopVService();
         }
     }
-
 
     private void setupHostFile() {
         SharedPreferences settings = getSharedPreferences(VhostsActivity.PREFS_NAME, Context.MODE_PRIVATE);
@@ -199,6 +208,13 @@ public class VhostsService extends VpnService {
             }
             vpnInterface = builder.setSession(getString(R.string.app_name)).setConfigureIntent(pendingIntent).establish();
         }
+    }
+
+    private void setupNsd() {
+        nsdManager = (NsdManager)(getApplicationContext().getSystemService(Context.NSD_SERVICE));
+        initializeResolveListener();
+        initializeDiscoveryListener();
+        nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, discoveryListener);
     }
 
     private void registerNetReceiver() {
@@ -384,5 +400,82 @@ public class VhostsService extends VpnService {
             }
         }
     }
+
+    public void initializeDiscoveryListener() {
+
+        // Instantiate a new DiscoveryListener
+        discoveryListener = new NsdManager.DiscoveryListener() {
+
+            // Called as soon as service discovery begins.
+            @Override
+            public void onDiscoveryStarted(String regType) {
+                Log.d(TAG, "Service discovery started");
+            }
+
+            @Override
+            public void onServiceFound(NsdServiceInfo service) {
+                Log.d(TAG, "Service discovery success. " + service);
+                if (service.getServiceType().equals(SERVICE_TYPE)) {
+                    nsdManager.resolveService(service, resolveListener);
+                }
+            }
+
+            @Override
+            public void onServiceLost(NsdServiceInfo service) {
+                String name = sanitizeNdsHostname(service.getServiceName());
+                DnsChange.removeHost(name);
+                Log.e(TAG, "service lost: " + service);
+            }
+
+            @Override
+            public void onDiscoveryStopped(String serviceType) {
+                Log.i(TAG, "Discovery stopped: " + serviceType);
+            }
+
+            @Override
+            public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+                nsdManager.stopServiceDiscovery(this);
+            }
+
+            @Override
+            public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+                nsdManager.stopServiceDiscovery(this);
+            }
+        };
+    }
+
+    private void initializeResolveListener() {
+        resolveListener = new NsdManager.ResolveListener() {
+
+            @Override
+            public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                // Called when the resolve fails.  Use the error code to debug.
+                Log.e(TAG, "Resolve failed" + errorCode);
+            }
+
+            @Override
+            public void onServiceResolved(NsdServiceInfo serviceInfo) {
+
+                // Port is being returned as 9. Not needed.
+                //int port = mServiceInfo.getPort();
+
+                String name = sanitizeNdsHostname(serviceInfo.getServiceName());
+                String address = serviceInfo.getHost().getHostAddress();
+                DnsChange.addHost(name, address);
+                Log.d(TAG, String.format("Nsd resolved address: %s = %s", name, address));
+            }
+        };
+    }
+
+    private String sanitizeNdsHostname(String name) {
+        if(name.contains(" ")){
+            name= name.substring(0, name.indexOf(" "));
+        }
+        name = "." + name + ".xz"; // todo: replace me by settings options (local domain + wildcard support)
+        return name;
+    }
+
 
 }
