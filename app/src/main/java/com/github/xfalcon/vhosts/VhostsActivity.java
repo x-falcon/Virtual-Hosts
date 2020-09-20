@@ -72,6 +72,7 @@ public class VhostsActivity extends AppCompatActivity {
         final Button selectHosts = findViewById(R.id.button_select_hosts);
         final FloatingActionButton fab_boot = findViewById(R.id.fab_boot);
         final FloatingActionButton fab_donation = findViewById(R.id.fab_donation);
+        final FloatingActionButton fab_settings = findViewById(R.id.fab_settings);
         if (checkHostUri() == -1) {
             selectHosts.setText(getString(R.string.select_hosts));
         }
@@ -125,6 +126,13 @@ public class VhostsActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(), DonationActivity.class));
             }
         });
+        fab_settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+            }
+        });
+
 
         LocalBroadcastManager.getInstance(this).registerReceiver(vpnStateReceiver,
                 new IntentFilter(VhostsService.BROADCAST_VPN_STATE));
