@@ -52,4 +52,8 @@
     <!-- Preference Titles -->
     <string name="channels_header">Channels</string>
     <string name="server_title">DNS server</string>
+    <string name="debug_header">Debug</string>
+    <string name="developer_mode_title">Developer mode</string>
+    <string name="developer_mode_off">Developer mode is disabled</string>
+    <string name="developer_mode_on">Developer mode is enabled</string>
 </resources>

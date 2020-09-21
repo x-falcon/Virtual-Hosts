@@ -21,4 +21,12 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/debug_header">
+        <SwitchPreferenceCompat
+            app:key="developer_mode"
+            app:summaryOff="@string/developer_mode_off"
+            app:summaryOn="@string/developer_mode_on"
+            app:title="@string/developer_mode_title" />
+    </PreferenceCategory>
+
 </PreferenceScreen>
