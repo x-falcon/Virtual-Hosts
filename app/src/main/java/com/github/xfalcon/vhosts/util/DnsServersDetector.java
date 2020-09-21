@@ -1,4 +1,4 @@
-package com.github.xfalcon.vhosts;
+package com.github.xfalcon.vhosts.util;
 
 import android.annotation.TargetApi;
 import android.content.Context;
