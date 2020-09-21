@@ -43,10 +43,9 @@ import java.util.Enumeration;
 
 public class NetworkReceiver extends BroadcastReceiver {
 
-    DnsServersDetector dnsServersDetector;
-
     private static final String TAG = NetworkReceiver.class.getSimpleName();
     public static String ipAddress = null;
+    private static int lastNetworkType = 0;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -55,38 +54,33 @@ public class NetworkReceiver extends BroadcastReceiver {
             return;
         }
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String server = sharedPreferences.getString("server", "google");
-        if ((server != null) && (server.equals("system"))) {
-            dnsServersDetector = new DnsServersDetector(context);
-            String dns4 = dnsServersDetector.getDns4();
-            String dns6 = dnsServersDetector.getDns6();
-            String oldDns4 = VhostsService.getVpnDns4();
-            String oldDns6 = VhostsService.getVpnDns6();
-            if (dns4 != null && !dns4.equals(oldDns4)) {
-                Log.d(TAG, String.format("DNS change: %s to %s", oldDns4, dns4));
-                VhostsService.restartVService(context);
-            } else if (dns6 != null && !dns6.equals(oldDns6)) {
-                Log.d(TAG, String.format("DNS change: %s to %s", oldDns6, dns6));
-                VhostsService.restartVService(context);
-            }
-        }
-
-        /*
         final ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
 
         if (networkInfo == null) { return; }
-        if (networkInfo.isAvailable()& networkInfo.isConnected()) {
-            if (networkInfo.getType()==ConnectivityManager.TYPE_WIFI) {
-                 ipAddress = getWifiIpAddress(context);
-                    LogUtils.d(TAG, "WIFI "+ipAddress);
-            } else if (networkInfo.getType()==ConnectivityManager.TYPE_MOBILE) {
-                    ipAddress = getMobileIpAddress();
-                    LogUtils.d(TAG,"MOBILE "+ipAddress);
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String server = sharedPreferences.getString("server", "google");
+        if ((server != null) && (server.equals("system"))) {
+            if (networkInfo.isAvailable()& networkInfo.isConnected()) {
+                int networkType = networkInfo.getType();
+                if (networkType != lastNetworkType) {
+                    lastNetworkType = networkType;
+                    VhostsService.restartVService(context);
+                }
             }
         }
-         */
+
+//        if (networkInfo.isAvailable()& networkInfo.isConnected()) {
+//            if (networkInfo.getType()==ConnectivityManager.TYPE_WIFI) {
+//                 ipAddress = getWifiIpAddress(context);
+//                    LogUtils.d(TAG, "WIFI "+ipAddress);
+//            } else if (networkInfo.getType()==ConnectivityManager.TYPE_MOBILE) {
+//                    ipAddress = getMobileIpAddress();
+//                    LogUtils.d(TAG,"MOBILE "+ipAddress);
+//            }
+//        }
+
     }
 
     private String getWifiIpAddress(Context context) {

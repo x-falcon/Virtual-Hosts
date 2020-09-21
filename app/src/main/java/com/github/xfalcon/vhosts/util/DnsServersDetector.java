@@ -47,6 +47,8 @@ import static android.content.Context.CONNECTIVITY_SERVICE;
 public class DnsServersDetector {
 
     private static final String TAG = "DnsServersDetector";
+    private ArrayList<String> vpnDns4  = new ArrayList<>();
+    private ArrayList<String> vpnDns6  = new ArrayList<>();
 
     /**
      * Holds some default DNS servers used in case all DNS servers detection methods fail.
@@ -74,16 +76,35 @@ public class DnsServersDetector {
      * Constructor
      */
     public DnsServersDetector(Context context) {
-
         this.context = context;
-
+        String [] dnsServers = getServers();
+        for (String dnsServer : dnsServers) {
+            if (dnsServer.contains(":")) {
+                vpnDns6.add(dnsServer);
+            } else {
+                vpnDns4.add(dnsServer);
+            }
+        }
     }
+
+    public ArrayList<String> getVpnDns4() {
+        return vpnDns4;
+    }
+
+    public ArrayList<String> getVpnDns6() {
+        return vpnDns6;
+    }
+
+    //endregion
+
+    //region - private /////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Returns android DNS servers used for current connected network
      * @return Dns servers array
      */
-    public String [] getServers() {
+    private String [] getServers() {
 
         // Will hold the consecutive result
         String[] result;
@@ -118,31 +139,6 @@ public class DnsServersDetector {
         return FACTORY_DNS_SERVERS;
 
     }
-
-    public String getDns4() {
-        String [] dnsServers = getServers();
-        for (String dnsServer : dnsServers) {
-            if (! dnsServer.contains(":")) {
-                return dnsServer;
-            }
-        }
-        return null;
-    }
-
-    public String getDns6() {
-        String [] dnsServers = getServers();
-        for (String dnsServer : dnsServers) {
-            if (dnsServer.contains(":")) {
-                return dnsServer;
-            }
-        }
-        return null;
-    }
-
-    //endregion
-
-    //region - private /////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Detect android DNS servers by using connectivity manager
