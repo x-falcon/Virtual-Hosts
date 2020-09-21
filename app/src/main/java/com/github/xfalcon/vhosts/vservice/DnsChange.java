@@ -116,17 +116,15 @@ public class DnsChange {
                 if (line.length() > 1000 || line.startsWith(STR_COMMENT)) continue;
                 Matcher matcher = HOST_PATTERN.matcher(line);
                 if (matcher.find()) {
-                    String ip = matcher.group(2).trim();
+                    String host;
+                    String ip;
                     try {
-                        Address.getByAddress(ip);
-                    } catch (Exception e) {
+                        host = matcher.group(3).trim();
+                        ip = matcher.group(2).trim();
+                    } catch (NullPointerException e) {
                         continue;
                     }
-                    if (ip.contains(":")) {
-                        DOMAINS_IP_MAPS6.put(matcher.group(3).trim() + ".", ip);
-                    } else {
-                        DOMAINS_IP_MAPS4.put(matcher.group(3).trim() + ".", ip);
-                    }
+                    addHost(host, ip);
                 }
             }
             reader.close();
@@ -138,6 +136,29 @@ public class DnsChange {
             LogUtils.d(TAG, "Hook dns error", e);
             return 0;
         }
+    }
+
+    public static boolean addHost(final String host, final String ip) {
+        try {
+            Address.getByAddress(ip);
+        } catch (Exception e) {
+            return false;
+        }
+        String key = host + ".";
+        if (ip.contains(":")) {
+            DOMAINS_IP_MAPS6.remove(key);
+            DOMAINS_IP_MAPS6.put(key, ip);
+        } else {
+            DOMAINS_IP_MAPS4.remove(key);
+            DOMAINS_IP_MAPS4.put(key, ip);
+        }
+        return true;
+    }
+
+    public static void removeHost(final String host) {
+        String key = host + ".";
+        DOMAINS_IP_MAPS4.remove(key);
+        DOMAINS_IP_MAPS6.remove(key);
     }
 
 }

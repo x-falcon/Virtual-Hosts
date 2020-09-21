@@ -1,0 +1,32 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/channels_header">
+
+        <ListPreference
+            app:defaultValue="google"
+            app:entries="@array/server_entries"
+            app:entryValues="@array/server_values"
+            app:key="server"
+            app:title="@string/server_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <!--
+        <SwitchPreferenceCompat
+            app:dependency="sync"
+            app:key="attachment"
+            app:summaryOff="@string/attachment_summary_off"
+            app:summaryOn="@string/attachment_summary_on"
+            app:title="@string/attachment_title" />
+            -->
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/debug_header">
+        <SwitchPreferenceCompat
+            app:key="developer_mode"
+            app:summaryOff="@string/developer_mode_off"
+            app:summaryOn="@string/developer_mode_on"
+            app:title="@string/developer_mode_title" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

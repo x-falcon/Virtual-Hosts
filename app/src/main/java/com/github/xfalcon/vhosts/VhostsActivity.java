@@ -21,9 +21,11 @@ package com.github.xfalcon.vhosts;
 import android.content.*;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -45,9 +47,13 @@ public class VhostsActivity extends AppCompatActivity {
     public static final String HOSTS_URL = "HOSTS_URL";
     public static final String HOSTS_URI = "HOST_URI";
     public static final String NET_HOST_FILE = "net_hosts";
-
-
     private boolean waitingForVPNStart;
+    private static final int mStatusCheckerInterval = 500;
+    private Handler mHandler;
+
+    private SwitchButton vpnButton;
+    private Button selectHosts;
+
 
     private BroadcastReceiver vpnStateReceiver = new BroadcastReceiver() {
         @Override
@@ -62,15 +68,17 @@ public class VhostsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         launch();
         StatService.autoTrace(this, true, false);
         setContentView(R.layout.activity_vhosts);
         LogUtils.context = getApplicationContext();
-        final SwitchButton vpnButton = findViewById(R.id.button_start_vpn);
 
-        final Button selectHosts = findViewById(R.id.button_select_hosts);
+        vpnButton = (SwitchButton) findViewById(R.id.button_start_vpn);
+        selectHosts = (Button) findViewById(R.id.button_select_hosts);
         final FloatingActionButton fab_boot = findViewById(R.id.fab_boot);
         final FloatingActionButton fab_donation = findViewById(R.id.fab_donation);
+        final FloatingActionButton fab_settings = findViewById(R.id.fab_settings);
         if (checkHostUri() == -1) {
             selectHosts.setText(getString(R.string.select_hosts));
         }
@@ -124,9 +132,18 @@ public class VhostsActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(), DonationActivity.class));
             }
         });
+        fab_settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+            }
+        });
+
 
         LocalBroadcastManager.getInstance(this).registerReceiver(vpnStateReceiver,
                 new IntentFilter(VhostsService.BROADCAST_VPN_STATE));
+
+        mHandler = new Handler();
     }
 
     private void launch() {
@@ -251,16 +268,37 @@ public class VhostsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         setButton(!waitingForVPNStart && !VhostsService.isRunning());
+        mStatusChecker.run();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        mHandler.removeCallbacks(mStatusChecker);
+    }
+
+    private Runnable mStatusChecker = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                updateStatus(); //this function can change value of mInterval.
+            } finally {
+                // 100% guarantee that this always happens, even if
+                // your update method throws an exception
+                mHandler.postDelayed(mStatusChecker, mStatusCheckerInterval);
+            }
+        }
+    };
+
+    private void updateStatus() {
+        if (!waitingForVPNStart) {
+            if (VhostsService.isRunning() != vpnButton.isChecked()) {
+                vpnButton.setChecked(VhostsService.isRunning());
+            }
+        }
     }
 
     private void setButton(boolean enable) {
-        final SwitchButton vpnButton = (SwitchButton) findViewById(R.id.button_start_vpn);
-        final Button selectHosts = (Button) findViewById(R.id.button_select_hosts);
         if (enable) {
             vpnButton.setChecked(false);
             selectHosts.setAlpha(1.0f);

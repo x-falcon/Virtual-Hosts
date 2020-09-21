@@ -1,0 +1,12 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="server_entries">
+        <item>System default</item>
+        <item>Google public servers</item>
+    </string-array>
+
+    <string-array name="server_values">
+        <item>system</item>
+        <item>google</item>
+    </string-array>
+</resources>

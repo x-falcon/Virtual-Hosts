@@ -20,24 +20,38 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.VpnService;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
-import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
+import android.widget.Toast;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.PreferenceManager;
+
 import com.github.xfalcon.vhosts.NetworkReceiver;
 import com.github.xfalcon.vhosts.R;
 import com.github.xfalcon.vhosts.VhostsActivity;
+import com.github.xfalcon.vhosts.util.DnsServersDetector;
 import com.github.xfalcon.vhosts.util.LogUtils;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.Selector;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,6 +66,9 @@ public class VhostsService extends VpnService {
     private static final String VPN_ROUTE6 = "::"; // Intercept everything
     private static String VPN_DNS4 = "8.8.8.8";
     private static String VPN_DNS6 = "2001:4860:4860::8888";
+    private ArrayList<String> vpnDns4  = new ArrayList<>();
+    private ArrayList<String> vpnDns6  = new ArrayList<>();
+
 
     public static final String BROADCAST_VPN_STATE = VhostsService.class.getName() + ".VPN_STATE";
     public static final String ACTION_CONNECT = VhostsService.class.getName() + ".START";
@@ -74,11 +91,15 @@ public class VhostsService extends VpnService {
     private ReentrantLock tcpSelectorLock;
     private NetworkReceiver netStateReceiver;
     private static boolean isOAndBoot = false;
+    private static boolean pendingRestart = false;
 
+    // Network Service Discovery
+    private static final String SERVICE_TYPE = "_workstation._tcp.";
+    private NsdManager nsdManager;
+    private NsdManager.DiscoveryListener discoveryListener;
 
     @Override
     public void onCreate() {
-//        registerNetReceiver();
         super.onCreate();
         if (isOAndBoot) {
             //android 8.0 boot
@@ -94,14 +115,17 @@ public class VhostsService extends VpnService {
             }
             isOAndBoot=false;
         }
+        registerNetReceiver();
         setupHostFile();
         setupVPN();
+        setupNsd();
         if (vpnInterface == null) {
             LogUtils.d(TAG, "unknow error");
             stopVService();
             return;
         }
         isRunning = true;
+        pendingRestart = false;
         try {
             udpSelector = Selector.open();
             tcpSelector = Selector.open();
@@ -126,7 +150,6 @@ public class VhostsService extends VpnService {
             stopVService();
         }
     }
-
 
     private void setupHostFile() {
         SharedPreferences settings = getSharedPreferences(VhostsActivity.PREFS_NAME, Context.MODE_PRIVATE);
@@ -155,14 +178,34 @@ public class VhostsService extends VpnService {
             Builder builder = new Builder();
             builder.addAddress(VPN_ADDRESS, 32);
             builder.addAddress(VPN_ADDRESS6, 128);
-            VPN_DNS4 = getString(R.string.dns_server);
-            LogUtils.d(TAG, "use dns:" + VPN_DNS4);
-            builder.addRoute(VPN_DNS4, 32);
-            builder.addRoute(VPN_DNS6, 128);
+
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            String server = sharedPreferences.getString("server", "google");
+            vpnDns4.clear();
+            vpnDns6.clear();
+            if ((server == null) || (server.equals("google"))) {
+                VPN_DNS4 = getString(R.string.dns_server);
+                vpnDns4.add(VPN_DNS4);
+                vpnDns6.add(VPN_DNS6);
+            } else {
+                DnsServersDetector dnsServersDetector = new DnsServersDetector(this);
+                vpnDns4.addAll(dnsServersDetector.getVpnDns4());
+                vpnDns6.addAll(dnsServersDetector.getVpnDns6());
+            }
+
+            LogUtils.d(TAG, "use dns:" + vpnDns4.toString() + vpnDns6.toString());
+
+            for (String dnsServer: vpnDns4) {
+                builder.addRoute(dnsServer, 32);
+                builder.addDnsServer(dnsServer);
+            }
+            for (String dnsServer: vpnDns6) {
+                builder.addRoute(dnsServer, 128);
+                builder.addDnsServer(dnsServer);
+            }
 //            builder.addRoute(VPN_ROUTE,0);
 //            builder.addRoute(VPN_ROUTE6,0);
-            builder.addDnsServer(VPN_DNS4);
-            builder.addDnsServer(VPN_DNS6);
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 String[] whiteList = {"com.android.vending", "com.google.android.apps.docs", "com.google.android.apps.photos", "com.google.android.gm", "com.google.android.apps.translate"};
                 for (String white : whiteList) {
@@ -178,22 +221,27 @@ public class VhostsService extends VpnService {
         }
     }
 
+    private void setupNsd() {
+        nsdManager = (NsdManager)(getApplicationContext().getSystemService(Context.NSD_SERVICE));
+        initializeDiscoveryListener();
+        nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, discoveryListener);
+    }
+
     private void registerNetReceiver() {
-        //wifi 4G state
-//        IntentFilter filter = new IntentFilter();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 //        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
 //        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-//        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-//        netStateReceiver = new NetworkReceiver();
-//        registerReceiver(netStateReceiver, filter);
+        netStateReceiver = new NetworkReceiver();
+        registerReceiver(netStateReceiver, filter);
 
     }
 
     private void unregisterNetReceiver() {
-//        if (netStateReceiver != null) {
-//            unregisterReceiver(netStateReceiver);
-//            netStateReceiver = null;
-//        }
+        if (netStateReceiver != null) {
+            unregisterReceiver(netStateReceiver);
+            netStateReceiver = null;
+        }
     }
 
     @Override
@@ -208,7 +256,6 @@ public class VhostsService extends VpnService {
     }
 
     public static boolean isRunning() {
-
         return isRunning;
     }
 
@@ -236,9 +283,19 @@ public class VhostsService extends VpnService {
         context.startService(new Intent(context, VhostsService.class).setAction(VhostsService.ACTION_DISCONNECT));
     }
 
+    public static void restartVService(Context context) {
+        Toast.makeText(context, "Restarting Service", Toast.LENGTH_SHORT).show();
+        if (isRunning) {
+            pendingRestart = true;
+            stopVService(context);
+        } else {
+            startVService(context, 0);
+        }
+    }
+
     private void stopVService() {
         if (threadHandleHosts != null) threadHandleHosts.interrupt();
-//        unregisterNetReceiver();
+        unregisterNetReceiver();
         if (executorService != null) executorService.shutdownNow();
         isRunning = false;
         cleanup();
@@ -256,6 +313,9 @@ public class VhostsService extends VpnService {
     public void onDestroy() {
         stopVService();
         super.onDestroy();
+        if (pendingRestart) {
+            startVService(this, 0);
+        }
     }
 
     private void cleanup() {
@@ -362,4 +422,79 @@ public class VhostsService extends VpnService {
         }
     }
 
+  public void initializeDiscoveryListener() {
+
+        // Instantiate a new DiscoveryListener
+        discoveryListener = new NsdManager.DiscoveryListener() {
+            String TAG = "Nsd";
+
+            // Called as soon as service discovery begins.
+            @Override
+            public void onDiscoveryStarted(String regType) {
+                Log.d(TAG, "Service discovery started");
+            }
+
+            @Override
+            public void onServiceFound(NsdServiceInfo service) {
+                Log.d(TAG, "Service discovery success. " + service);
+                if (service.getServiceType().equals(SERVICE_TYPE)) {
+                    nsdManager.resolveService(service, new MyResolveListener());
+                }
+            }
+
+            @Override
+            public void onServiceLost(NsdServiceInfo service) {
+                String name = sanitizeNdsHostname(service.getServiceName());
+                DnsChange.removeHost(name);
+                Log.e(TAG, "service lost: " + service);
+            }
+
+            @Override
+            public void onDiscoveryStopped(String serviceType) {
+                Log.i(TAG, "Discovery stopped: " + serviceType);
+            }
+
+            @Override
+            public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+                nsdManager.stopServiceDiscovery(this);
+            }
+
+            @Override
+            public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+                nsdManager.stopServiceDiscovery(this);
+            }
+        };
+    }
+
+    private class MyResolveListener implements NsdManager.ResolveListener {
+
+        String TAG = "Nsd";
+
+        @Override
+        public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+            Log.e(TAG, "Resolve failed" + errorCode);
+        }
+
+        @Override
+        public void onServiceResolved(NsdServiceInfo serviceInfo) {
+            // Port is being returned as 9. Not needed.
+            //int port = mServiceInfo.getPort();
+
+            String name = sanitizeNdsHostname(serviceInfo.getServiceName());
+            String address = serviceInfo.getHost().getHostAddress();
+            DnsChange.addHost(name, address);
+            Log.d(TAG, String.format("Nsd resolved address: %s = %s", name, address));
+        }
+    }
+
+
+    private String sanitizeNdsHostname(String name) {
+        if(name.contains(" ")){
+            name= name.substring(0, name.indexOf(" "));
+        }
+        name = "." + name + ".xz"; // todo: replace me by settings options (local domain + wildcard support)
+        return name;
+    }
 }

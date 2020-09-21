@@ -22,11 +22,18 @@ package com.github.xfalcon.vhosts;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.util.Log;
+
+import androidx.preference.PreferenceManager;
+
+import com.github.xfalcon.vhosts.util.DnsServersDetector;
 import com.github.xfalcon.vhosts.util.LogUtils;
+import com.github.xfalcon.vhosts.vservice.VhostsService;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -34,30 +41,46 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
-
-
 public class NetworkReceiver extends BroadcastReceiver {
 
     private static final String TAG = NetworkReceiver.class.getSimpleName();
     public static String ipAddress = null;
+    private static int lastNetworkType = 0;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(!ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())){
+        // Log.d(TAG, "Received: " + intent.getAction());
+        if (! ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
             return;
         }
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if (networkInfo == null) return;
-        if (networkInfo.isAvailable()& networkInfo.isConnected()) {
-            if (networkInfo.getType()==ConnectivityManager.TYPE_WIFI) {
-                 ipAddress = getWifiIpAddress(context);
-                    LogUtils.d(TAG, "WIFI "+ipAddress);
-            } else if (networkInfo.getType()==ConnectivityManager.TYPE_MOBILE) {
-                    ipAddress = getMobileIpAddress();
-                    LogUtils.d(TAG,"MOBILE "+ipAddress);
+
+        final ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if (networkInfo == null) { return; }
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String server = sharedPreferences.getString("server", "google");
+        if ((server != null) && (server.equals("system"))) {
+            if (networkInfo.isAvailable()& networkInfo.isConnected()) {
+                int networkType = networkInfo.getType();
+                if (networkType != lastNetworkType) {
+                    lastNetworkType = networkType;
+                    VhostsService.restartVService(context);
+                }
             }
         }
+
+//        if (networkInfo.isAvailable()& networkInfo.isConnected()) {
+//            if (networkInfo.getType()==ConnectivityManager.TYPE_WIFI) {
+//                 ipAddress = getWifiIpAddress(context);
+//                    LogUtils.d(TAG, "WIFI "+ipAddress);
+//            } else if (networkInfo.getType()==ConnectivityManager.TYPE_MOBILE) {
+//                    ipAddress = getMobileIpAddress();
+//                    LogUtils.d(TAG,"MOBILE "+ipAddress);
+//            }
+//        }
+
     }
 
     private String getWifiIpAddress(Context context) {

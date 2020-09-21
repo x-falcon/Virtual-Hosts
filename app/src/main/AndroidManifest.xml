@@ -1,105 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.github.xfalcon.vhosts">
+    package="com.github.xfalcon.vhosts">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <!-- <uses-permission android:name="android.permission.READ_PHONE_STATE" /> -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.BLUETOOTH"/>
-    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
-    <uses-permission android:name="com.android.vending.BILLING"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- <uses-permission android:name="android.permission.READ_PHONE_STATE" /> -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <uses-permission android:name="com.android.vending.BILLING" />
 
     <supports-screens
-            android:anyDensity="true"
-            android:largeScreens="true"
-            android:normalScreens="true"
-            android:resizeable="true"
-            android:smallScreens="true"
-            android:xlargeScreens="true"/>
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:resizeable="true"
+        android:smallScreens="true"
+        android:xlargeScreens="true" />
 
     <application
-            android:allowBackup="false"
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/app_name"
-            android:supportsRtl="true"
-            android:hardwareAccelerated="true"
-            android:largeHeap="true"
-            android:theme="@style/AppTheme">
+        android:allowBackup="false"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".VhostsActivity" />
         <activity android:name=".VhostsActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <receiver
-                android:name=".BootReceiver"
-                android:enabled="true"
-                android:exported="true">
+            android:name=".BootReceiver"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
         <service
-                android:name=".vservice.VhostsService"
-                android:enabled="true"
-                android:exported="true"
-                android:permission="android.permission.BIND_VPN_SERVICE">
+            android:name=".vservice.VhostsService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_VPN_SERVICE">
             <intent-filter>
-                <action android:name="android.net.VpnService"/>
+                <action android:name="android.net.VpnService" />
             </intent-filter>
         </service>
 
         <meta-data
-                android:name="BaiduMobAd_STAT_ID"
-                android:value="a7bceb64e8"/> <!-- abcd1234 -->
+            android:name="BaiduMobAd_STAT_ID"
+            android:value="a7bceb64e8" /> <!-- abcd1234 -->
         <meta-data
-                android:name="BaiduMobAd_CHANNEL"
-                android:value="${Market_CHANNEL_VALUE}"/>
+            android:name="BaiduMobAd_CHANNEL"
+            android:value="${Market_CHANNEL_VALUE}" />
         <meta-data
-                android:name="BaiduMobAd_EXCEPTION_LOG"
-                android:value="true"/>
+            android:name="BaiduMobAd_EXCEPTION_LOG"
+            android:value="true" />
         <meta-data
-                android:name="BaiduMobAd_SEND_STRATEGY"
-                android:value="APP_START"/>
+            android:name="BaiduMobAd_SEND_STRATEGY"
+            android:value="APP_START" />
         <meta-data
-                android:name="BaiduMobAd_ONLY_WIFI"
-                android:value="false"/>
+            android:name="BaiduMobAd_ONLY_WIFI"
+            android:value="false" />
 
         <service
-                android:name=".QuickStartTileService"
-                android:icon="@drawable/tile"
-                android:label="@string/app_name"
-                android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            android:name=".QuickStartTileService"
+            android:icon="@drawable/tile"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
-                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
 
         <receiver android:name=".QuickStartWidget">
             <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-                <action android:name="com.github.xfalcon.ACTION_QUICK_START_BUTTON"/>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.github.xfalcon.ACTION_QUICK_START_BUTTON" />
             </intent-filter>
 
             <meta-data
-                    android:name="android.appwidget.provider"
-                    android:resource="@xml/quick_start_widget_info"/>
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quick_start_widget_info" />
         </receiver>
 
-        <activity android:name=".DonationActivity">
-        </activity>
-        <activity android:name=".AdvanceActivity">
-        </activity>
+        <activity android:name=".DonationActivity" />
+        <activity android:name=".AdvanceActivity" />
     </application>
 
 </manifest>

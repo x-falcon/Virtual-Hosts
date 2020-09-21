@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Virtual Hosts</string>
     <string name="action_settings">Settings</string>
     <string name="update_button">update</string>
@@ -45,4 +45,15 @@
     <string name="down_success">Download Success Get %d Host Records</string>
     <string name="down_error">Download Failed</string>
     <string name="runing_notice">Virtual Hosts Is Running</string>
+    <string name="fab_label_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="url">URL</string>
+
+    <!-- Preference Titles -->
+    <string name="channels_header">Channels</string>
+    <string name="server_title">DNS server</string>
+    <string name="debug_header">Debug</string>
+    <string name="developer_mode_title">Developer mode</string>
+    <string name="developer_mode_off">Developer mode is disabled</string>
+    <string name="developer_mode_on">Developer mode is enabled</string>
 </resources>
