@@ -93,7 +93,6 @@ public class VhostsService extends VpnService {
     private static final String SERVICE_TYPE = "_workstation._tcp.";
     private NsdManager nsdManager;
     private NsdManager.DiscoveryListener discoveryListener;
-    private NsdManager.ResolveListener resolveListener;
 
     @Override
     public void onCreate() {
@@ -216,7 +215,6 @@ public class VhostsService extends VpnService {
 
     private void setupNsd() {
         nsdManager = (NsdManager)(getApplicationContext().getSystemService(Context.NSD_SERVICE));
-        initializeResolveListener();
         initializeDiscoveryListener();
         nsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, discoveryListener);
     }
@@ -419,6 +417,7 @@ public class VhostsService extends VpnService {
 
         // Instantiate a new DiscoveryListener
         discoveryListener = new NsdManager.DiscoveryListener() {
+            String TAG = "Nsd";
 
             // Called as soon as service discovery begins.
             @Override
@@ -430,7 +429,7 @@ public class VhostsService extends VpnService {
             public void onServiceFound(NsdServiceInfo service) {
                 Log.d(TAG, "Service discovery success. " + service);
                 if (service.getServiceType().equals(SERVICE_TYPE)) {
-                    nsdManager.resolveService(service, resolveListener);
+                    nsdManager.resolveService(service, new MyResolveListener());
                 }
             }
 
@@ -460,8 +459,31 @@ public class VhostsService extends VpnService {
         };
     }
 
+    private class MyResolveListener implements NsdManager.ResolveListener {
+
+        String TAG = "Nsd";
+
+        @Override
+        public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+            Log.e(TAG, "Resolve failed" + errorCode);
+        }
+
+        @Override
+        public void onServiceResolved(NsdServiceInfo serviceInfo) {
+            // Port is being returned as 9. Not needed.
+            //int port = mServiceInfo.getPort();
+
+            String name = sanitizeNdsHostname(serviceInfo.getServiceName());
+            String address = serviceInfo.getHost().getHostAddress();
+            DnsChange.addHost(name, address);
+            Log.d(TAG, String.format("Nsd resolved address: %s = %s", name, address));
+        }
+    }
+
+    /*
     private void initializeResolveListener() {
         resolveListener = new NsdManager.ResolveListener() {
+            String TAG = "Nsd";
 
             @Override
             public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
@@ -482,6 +504,7 @@ public class VhostsService extends VpnService {
             }
         };
     }
+     */
 
     private String sanitizeNdsHostname(String name) {
         if(name.contains(" ")){
