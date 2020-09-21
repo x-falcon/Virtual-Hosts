@@ -1,4 +1,4 @@
-package com.github.xfalcon.vhosts;
+package com.github.xfalcon.vhosts.util;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -119,6 +119,26 @@ public class DnsServersDetector {
 
     }
 
+    public String getDns4() {
+        String [] dnsServers = getServers();
+        for (String dnsServer : dnsServers) {
+            if (! dnsServer.contains(":")) {
+                return dnsServer;
+            }
+        }
+        return null;
+    }
+
+    public String getDns6() {
+        String [] dnsServers = getServers();
+        for (String dnsServer : dnsServers) {
+            if (dnsServer.contains(":")) {
+                return dnsServer;
+            }
+        }
+        return null;
+    }
+
     //endregion
 
     //region - private /////////////////////////////////////////////////////////////////////////////
@@ -149,21 +169,22 @@ public class DnsServersDetector {
                     for (Network network : connectivityManager.getAllNetworks()) {
 
                         NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
-                        if (networkInfo.isConnected()) {
+                        if ((networkInfo != null) && (networkInfo.isConnected())) {
 
                             LinkProperties linkProperties    = connectivityManager.getLinkProperties(network);
                             List<InetAddress> dnsServersList = linkProperties.getDnsServers();
 
                             // Prioritize the DNS servers for link which have a default route
                             if (linkPropertiesHasDefaultRoute(linkProperties)) {
-
                                 for (InetAddress element: dnsServersList) {
-
                                     String dnsHost = element.getHostAddress();
-                                    priorityServersArrayList.add(dnsHost);
-
+                                    // Prioritize wifi over mobile when both are active and default route (yep! that's android babe)
+                                    if (networkInfo.getType()==ConnectivityManager.TYPE_WIFI) {
+                                        priorityServersArrayList.add(0, dnsHost);
+                                    } else {
+                                        priorityServersArrayList.add(dnsHost);
+                                    }
                                 }
-
                             } else {
 
                                 for (InetAddress element: dnsServersList) {

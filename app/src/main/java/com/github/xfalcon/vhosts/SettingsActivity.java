@@ -27,10 +27,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     protected void onStop() {
         super.onStop();
-        // todo: stop service if changes in settings require it.
         if (VhostsService.isRunning())
-            startService(new Intent(this, VhostsService.class).setAction(VhostsService.ACTION_DISCONNECT));
-
+            VhostsService.restartVService(this);
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {

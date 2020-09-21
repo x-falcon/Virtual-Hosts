@@ -22,11 +22,18 @@ package com.github.xfalcon.vhosts;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.util.Log;
+
+import androidx.preference.PreferenceManager;
+
+import com.github.xfalcon.vhosts.util.DnsServersDetector;
 import com.github.xfalcon.vhosts.util.LogUtils;
+import com.github.xfalcon.vhosts.vservice.VhostsService;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -34,21 +41,42 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
-
-
 public class NetworkReceiver extends BroadcastReceiver {
+
+    DnsServersDetector dnsServersDetector;
 
     private static final String TAG = NetworkReceiver.class.getSimpleName();
     public static String ipAddress = null;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if(!ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())){
+        // Log.d(TAG, "Received: " + intent.getAction());
+        if (! ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
             return;
         }
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        if (networkInfo == null) return;
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String server = sharedPreferences.getString("server", "google");
+        if ((server != null) && (server.equals("system"))) {
+            dnsServersDetector = new DnsServersDetector(context);
+            String dns4 = dnsServersDetector.getDns4();
+            String dns6 = dnsServersDetector.getDns6();
+            String oldDns4 = VhostsService.getVpnDns4();
+            String oldDns6 = VhostsService.getVpnDns6();
+            if (dns4 != null && !dns4.equals(oldDns4)) {
+                Log.d(TAG, String.format("DNS change: %s to %s", oldDns4, dns4));
+                VhostsService.restartVService(context);
+            } else if (dns6 != null && !dns6.equals(oldDns6)) {
+                Log.d(TAG, String.format("DNS change: %s to %s", oldDns6, dns6));
+                VhostsService.restartVService(context);
+            }
+        }
+
+        /*
+        final ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if (networkInfo == null) { return; }
         if (networkInfo.isAvailable()& networkInfo.isConnected()) {
             if (networkInfo.getType()==ConnectivityManager.TYPE_WIFI) {
                  ipAddress = getWifiIpAddress(context);
@@ -58,6 +86,7 @@ public class NetworkReceiver extends BroadcastReceiver {
                     LogUtils.d(TAG,"MOBILE "+ipAddress);
             }
         }
+         */
     }
 
     private String getWifiIpAddress(Context context) {
