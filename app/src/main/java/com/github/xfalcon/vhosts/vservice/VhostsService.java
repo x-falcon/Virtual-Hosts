@@ -276,6 +276,7 @@ public class VhostsService extends VpnService {
     }
 
     public static void restartVService(Context context) {
+        Toast.makeText(context, "Restarting Service", Toast.LENGTH_SHORT).show();
         if (isRunning) {
             pendingRestart = true;
             stopVService(context);
