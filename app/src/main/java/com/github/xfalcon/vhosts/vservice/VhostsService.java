@@ -29,12 +29,9 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.VpnService;
-<<<<<<< HEAD
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-=======
 import android.net.wifi.WifiManager;
->>>>>>> dev
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -418,7 +415,6 @@ public class VhostsService extends VpnService {
         }
     }
 
-<<<<<<< HEAD
     public void initializeDiscoveryListener() {
 
         // Instantiate a new DiscoveryListener
