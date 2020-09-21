@@ -20,12 +20,16 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.VpnService;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.widget.Toast;
@@ -33,10 +37,10 @@ import android.widget.Toast;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.preference.PreferenceManager;
 
-import com.github.xfalcon.vhosts.DnsServersDetector;
 import com.github.xfalcon.vhosts.NetworkReceiver;
 import com.github.xfalcon.vhosts.R;
 import com.github.xfalcon.vhosts.VhostsActivity;
+import com.github.xfalcon.vhosts.util.DnsServersDetector;
 import com.github.xfalcon.vhosts.util.LogUtils;
 
 import java.io.*;
@@ -79,11 +83,11 @@ public class VhostsService extends VpnService {
     private ReentrantLock tcpSelectorLock;
     private NetworkReceiver netStateReceiver;
     private static boolean isOAndBoot = false;
+    private static boolean pendingRestart = false;
 
 
     @Override
     public void onCreate() {
-//        registerNetReceiver();
         super.onCreate();
         if (isOAndBoot) {
             //android 8.0 boot
@@ -99,6 +103,7 @@ public class VhostsService extends VpnService {
             }
             isOAndBoot=false;
         }
+        registerNetReceiver();
         setupHostFile();
         setupVPN();
         if (vpnInterface == null) {
@@ -167,15 +172,13 @@ public class VhostsService extends VpnService {
                 VPN_DNS4 = getString(R.string.dns_server);
             } else {
                 DnsServersDetector dnsServersDetector = new DnsServersDetector(this);
-                String [] dnsServers = dnsServersDetector.getServers();
-                if (dnsServers != null) {
-                    for (String dnsServer : dnsServers) {
-                        if (dnsServer.contains(":")) {
-                            VPN_DNS6 = dnsServer;
-                        } else {
-                            VPN_DNS4 = dnsServer;
-                        }
-                    }
+                String dns4 = dnsServersDetector.getDns4();
+                if (dns4 != null) {
+                    VPN_DNS4 =  dns4;
+                }
+                String dns6 = dnsServersDetector.getDns6();
+                if (dns6 != null) {
+                    VPN_DNS6 =  dns6;
                 }
             }
             LogUtils.d(TAG, "use dns:" + VPN_DNS4);
@@ -202,21 +205,20 @@ public class VhostsService extends VpnService {
     }
 
     private void registerNetReceiver() {
-        //wifi 4G state
-//        IntentFilter filter = new IntentFilter();
-//        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-//        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-//        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-//        netStateReceiver = new NetworkReceiver();
-//        registerReceiver(netStateReceiver, filter);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        netStateReceiver = new NetworkReceiver();
+        registerReceiver(netStateReceiver, filter);
 
     }
 
     private void unregisterNetReceiver() {
-//        if (netStateReceiver != null) {
-//            unregisterReceiver(netStateReceiver);
-//            netStateReceiver = null;
-//        }
+        if (netStateReceiver != null) {
+            unregisterReceiver(netStateReceiver);
+            netStateReceiver = null;
+        }
     }
 
     @Override
@@ -231,7 +233,6 @@ public class VhostsService extends VpnService {
     }
 
     public static boolean isRunning() {
-
         return isRunning;
     }
 
@@ -259,9 +260,18 @@ public class VhostsService extends VpnService {
         context.startService(new Intent(context, VhostsService.class).setAction(VhostsService.ACTION_DISCONNECT));
     }
 
+    public static void restartVService(Context context) {
+        if (isRunning) {
+            pendingRestart = true;
+            stopVService(context);
+        } else {
+            startVService(context, 0);
+        }
+    }
+
     private void stopVService() {
         if (threadHandleHosts != null) threadHandleHosts.interrupt();
-//        unregisterNetReceiver();
+        unregisterNetReceiver();
         if (executorService != null) executorService.shutdownNow();
         isRunning = false;
         cleanup();
@@ -279,6 +289,10 @@ public class VhostsService extends VpnService {
     public void onDestroy() {
         stopVService();
         super.onDestroy();
+        if (pendingRestart) {
+            startVService(this, 0);
+            pendingRestart = false;
+        }
     }
 
     private void cleanup() {
@@ -383,6 +397,14 @@ public class VhostsService extends VpnService {
                 closeResources(vpnInput, vpnOutput);
             }
         }
+    }
+
+    public static String getVpnDns4() {
+        return VPN_DNS4;
+    }
+
+    public static String getVpnDns6() {
+        return VPN_DNS6;
     }
 
 }
