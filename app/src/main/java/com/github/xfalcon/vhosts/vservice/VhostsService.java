@@ -112,6 +112,7 @@ public class VhostsService extends VpnService {
             return;
         }
         isRunning = true;
+        pendingRestart = false;
         try {
             udpSelector = Selector.open();
             tcpSelector = Selector.open();
@@ -291,7 +292,6 @@ public class VhostsService extends VpnService {
         super.onDestroy();
         if (pendingRestart) {
             startVService(this, 0);
-            pendingRestart = false;
         }
     }
 
