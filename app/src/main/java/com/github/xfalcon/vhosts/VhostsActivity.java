@@ -41,6 +41,7 @@ public class VhostsActivity extends AppCompatActivity {
 
     private FirebaseAnalytics mFirebaseAnalytics;
 
+
     private boolean waitingForVPNStart;
 
     private BroadcastReceiver vpnStateReceiver = new BroadcastReceiver() {
@@ -212,11 +213,9 @@ public class VhostsActivity extends AppCompatActivity {
         SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         Uri uri = intent.getData();
-        final int takeFlags = intent.getFlags()
-                & (Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         try {
-            getContentResolver().takePersistableUriPermission(uri, takeFlags);
+            getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             editor.putString(SettingsFragment.HOSTS_URI, uri.toString());
             editor.apply();
             switch (checkHostUri()){

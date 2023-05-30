@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.github.xfalcon.vhosts">
+          xmlns:tools="http://schemas.android.com/tools" package="com.github.xfalcon.vhosts">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
@@ -15,10 +15,12 @@
 <!--    <uses-permission android:name="android.permission.BLUETOOTH"/>-->
 <!--    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>-->
 <!--    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>-->
-    <uses-permission android:name="com.android.vending.BILLING"/>
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+
+    <uses-permission android:name="com.android.vending.BILLING"/>
+    <uses-permission android:name="android.permission.BIND_VPN_SERVICE" tools:ignore="ProtectedPermissions"/>
 
     <supports-screens
             android:anyDensity="true"
@@ -36,22 +38,12 @@
             android:hardwareAccelerated="true"
             android:largeHeap="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".VhostsActivity">
+        <activity android:name=".VhostsActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-        <receiver android:name="com.google.android.gms.analytics.AnalyticsReceiver"
-                  android:enabled="true">
-            <intent-filter>
-                <action android:name="com.google.android.gms.analytics.ANALYTICS_DISPATCH" />
-            </intent-filter>
-        </receiver>
-        <service android:name="com.google.android.gms.analytics.AnalyticsService"
-                 android:enabled="true"
-                 android:exported="false"/>
 
         <receiver
                 android:name=".BootReceiver"
@@ -92,13 +84,14 @@
                 android:name=".QuickStartTileService"
                 android:icon="@drawable/tile"
                 android:label="@string/app_name"
-                android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+                android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+                android:exported="true">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE"/>
             </intent-filter>
         </service>
 
-        <receiver android:name=".QuickStartWidget">
+        <receiver android:name=".QuickStartWidget" android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
                 <action android:name="com.github.xfalcon.ACTION_QUICK_START_BUTTON"/>
@@ -109,12 +102,14 @@
                     android:resource="@xml/quick_start_widget_info"/>
         </receiver>
 
-        <activity android:name=".DonationActivity">
+        <activity android:name=".DonationActivity"
+                  android:exported="false">
         </activity>
 
         <activity android:name=".SettingsActivity"
                   android:label="Settings"
-                  android:parentActivityName=".VhostsActivity">
+                  android:parentActivityName=".VhostsActivity"
+                  android:exported="false">
             <meta-data
                     android:name="android.support.PARENT_ACTIVITY"
                     android:value=".VhostsActivity"/>

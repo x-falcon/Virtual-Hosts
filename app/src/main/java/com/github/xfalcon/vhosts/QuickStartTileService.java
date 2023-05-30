@@ -18,10 +18,13 @@
 
 package com.github.xfalcon.vhosts;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import com.github.xfalcon.vhosts.vservice.VhostsService;
 
+@TargetApi(Build.VERSION_CODES.N)
 public class QuickStartTileService extends TileService {
 
     @Override

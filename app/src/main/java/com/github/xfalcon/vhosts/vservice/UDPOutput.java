@@ -87,7 +87,7 @@ public class UDPOutput implements Runnable
                 InetAddress destinationAddress = currentPacket.ipHeader.destinationAddress;
                 int destinationPort = currentPacket.udpHeader.destinationPort;
                 int sourcePort = currentPacket.udpHeader.sourcePort;
-                String ipAndPort=getStringBuild().append(destinationAddress.getHostAddress()).append(destinationPort).append(sourcePort).toString();
+                String ipAndPort= String.format("%s:%s:%s",destinationAddress.getHostAddress(),destinationPort,sourcePort);
                 DatagramChannel outputChannel = channelCache.get(ipAndPort);
                 if (outputChannel == null) {
                     outputChannel = DatagramChannel.open();
@@ -161,11 +161,6 @@ public class UDPOutput implements Runnable
         {
             // Ignore
         }
-    }
-
-    private StringBuilder getStringBuild(){
-        stringBuild.setLength(0);
-        return stringBuild;
     }
 
 }
