@@ -1,6 +1,6 @@
 plugins {
     id 'com.android.application'
-    id 'com.google.gms.google-services'
+//    id 'com.google.gms.google-services'
 }
 android {
     compileSdk 33
@@ -50,8 +50,8 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation platform('com.google.firebase:firebase-bom:32.1.0')
-    implementation 'com.google.firebase:firebase-analytics'
+//    implementation platform('com.google.firebase:firebase-bom:32.1.0')
+//    implementation 'com.google.firebase:firebase-analytics'
 
     implementation 'com.android.support:appcompat-v7:33.0.0'
     implementation 'com.android.support:cardview-v7:33.0.0'
@@ -59,7 +59,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.github.zcweng:switch-button:0.0.3@aar'
     implementation 'com.github.clans:fab:1.6.4'
-    implementation 'com.android.billingclient:billing:6.0.0'
+//    implementation 'com.android.billingclient:billing:6.0.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'

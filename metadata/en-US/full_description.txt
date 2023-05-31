@@ -1,0 +1,10 @@
+Virtual Hosts app helping developers customized hosts(/system/etc/hosts) File on android devices(no root).
+
+support wildcard DNS records.For example:
+
+127.0.0.1 a.com     |
+127.0.0.1 m.a.com   |  => 127.0.0.1 .a.com
+127.0.0.1 w.m.a.com |
+
+
+Video Demo: https://www.youtube.com/watch?v=pHnsboAnm-A

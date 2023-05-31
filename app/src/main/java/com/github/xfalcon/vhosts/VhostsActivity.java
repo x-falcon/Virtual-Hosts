@@ -30,7 +30,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.xfalcon.vhosts.util.LogUtils;
 import com.github.xfalcon.vhosts.vservice.VhostsService;
-import com.google.firebase.analytics.FirebaseAnalytics;
+//import com.google.firebase.analytics.FirebaseAnalytics;
 import com.suke.widget.SwitchButton;
 
 import java.lang.reflect.Field;
@@ -39,7 +39,7 @@ public class VhostsActivity extends AppCompatActivity {
 
     private static final String TAG = VhostsActivity.class.getSimpleName();
 
-    private FirebaseAnalytics mFirebaseAnalytics;
+//    private FirebaseAnalytics mFirebaseAnalytics;
 
 
     private boolean waitingForVPNStart;
@@ -60,7 +60,7 @@ public class VhostsActivity extends AppCompatActivity {
         launch();
 
 //        StatService.autoTrace(this, true, false);
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+//        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         setContentView(R.layout.activity_vhosts);
         LogUtils.context = getApplicationContext();

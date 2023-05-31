@@ -19,7 +19,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
 
-    <uses-permission android:name="com.android.vending.BILLING"/>
+<!--    <uses-permission android:name="com.android.vending.BILLING"/>-->
     <uses-permission android:name="android.permission.BIND_VPN_SERVICE" tools:ignore="ProtectedPermissions"/>
 
     <supports-screens
@@ -64,21 +64,21 @@
             </intent-filter>
         </service>
 
-        <meta-data
-                android:name="BaiduMobAd_STAT_ID"
-                android:value="a7bceb64e8"/> <!-- abcd1234 -->
-        <meta-data
-                android:name="BaiduMobAd_CHANNEL"
-                android:value="${Market_CHANNEL_VALUE}"/>
-        <meta-data
-                android:name="BaiduMobAd_EXCEPTION_LOG"
-                android:value="true"/>
-        <meta-data
-                android:name="BaiduMobAd_SEND_STRATEGY"
-                android:value="APP_START"/>
-        <meta-data
-                android:name="BaiduMobAd_ONLY_WIFI"
-                android:value="false"/>
+<!--        <meta-data-->
+<!--                android:name="BaiduMobAd_STAT_ID"-->
+<!--                android:value="a7bceb64e8"/> &lt;!&ndash; abcd1234 &ndash;&gt;-->
+<!--        <meta-data-->
+<!--                android:name="BaiduMobAd_CHANNEL"-->
+<!--                android:value="${Market_CHANNEL_VALUE}"/>-->
+<!--        <meta-data-->
+<!--                android:name="BaiduMobAd_EXCEPTION_LOG"-->
+<!--                android:value="true"/>-->
+<!--        <meta-data-->
+<!--                android:name="BaiduMobAd_SEND_STRATEGY"-->
+<!--                android:value="APP_START"/>-->
+<!--        <meta-data-->
+<!--                android:name="BaiduMobAd_ONLY_WIFI"-->
+<!--                android:value="false"/>-->
 
         <service
                 android:name=".QuickStartTileService"

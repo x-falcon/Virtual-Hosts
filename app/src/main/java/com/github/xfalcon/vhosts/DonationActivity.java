@@ -29,7 +29,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import com.android.billingclient.api.*;
+//import com.android.billingclient.api.*;
 import com.github.xfalcon.vhosts.util.LogUtils;
 
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class DonationActivity extends AppCompatActivity {
     private static final String WECHATPAY_QRADDRESS = "https://raw.githubusercontent.com/x-falcon/tools/master/w.png";
 
 
-    private BillingClient billingClient;
+//    private BillingClient billingClient;
 
 
     @Override
@@ -208,58 +208,58 @@ public class DonationActivity extends AppCompatActivity {
 
     public void initializeBillClient() {
 
-        billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(
-                (billingResult, list) -> {
-
-                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
-                        LogUtils.d(TAG, "BillingResult Response is OK");
-                        for (Purchase purchase : list) {
-
-                            LogUtils.d(TAG, "BillingResult Response is OK");
-                        }
-                    } else {
-
-                        LogUtils.d(TAG, "BillingResult Response NOT OK");
-                    }
-                }
-        ).build();
+//        billingClient = BillingClient.newBuilder(this).enablePendingPurchases().setListener(
+//                (billingResult, list) -> {
+//
+//                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && list != null) {
+//                        LogUtils.d(TAG, "BillingResult Response is OK");
+//                        for (Purchase purchase : list) {
+//
+//                            LogUtils.d(TAG, "BillingResult Response is OK");
+//                        }
+//                    } else {
+//
+//                        LogUtils.d(TAG, "BillingResult Response NOT OK");
+//                    }
+//                }
+//        ).build();
 
         establishConnection();
     }
 
     void establishConnection() {
-        billingClient.startConnection(new BillingClientStateListener() {
-            @Override
-            public void onBillingSetupFinished(@NonNull BillingResult billingResult) {
-                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-
-                    final Button button_google = (Button) findViewById(R.id.bt_google);
-                    final Button button_google2 = (Button) findViewById(R.id.bt_google2);
-                    final Button button_google4 = (Button) findViewById(R.id.bt_google4);
-                    final Button button_google6 = (Button) findViewById(R.id.bt_google6);
-                    final Button button_google8 = (Button) findViewById(R.id.bt_google8);
-                    final Button button_google10 = (Button) findViewById(R.id.bt_google10);
-                    button_google.setEnabled(true);
-                    button_google2.setEnabled(true);
-                    button_google4.setEnabled(true);
-                    button_google6.setEnabled(true);
-                    button_google8.setEnabled(true);
-                    button_google10.setEnabled(true);
-
-                    LogUtils.d(TAG, "Connection Established");
-                }else {
-                    LogUtils.e(TAG, "Problem setting up in-app billing: " + billingResult.toString());
-                }
-            }
-
-            @Override
-            public void onBillingServiceDisconnected() {
-                // Try to restart the connection on the next request to
-                // Google Play by calling the startConnection() method.
-                Log.d(TAG, "Connection NOT Established");
-                establishConnection();
-            }
-        });
+//        billingClient.startConnection(new BillingClientStateListener() {
+//            @Override
+//            public void onBillingSetupFinished(@NonNull BillingResult billingResult) {
+//                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+//
+//                    final Button button_google = (Button) findViewById(R.id.bt_google);
+//                    final Button button_google2 = (Button) findViewById(R.id.bt_google2);
+//                    final Button button_google4 = (Button) findViewById(R.id.bt_google4);
+//                    final Button button_google6 = (Button) findViewById(R.id.bt_google6);
+//                    final Button button_google8 = (Button) findViewById(R.id.bt_google8);
+//                    final Button button_google10 = (Button) findViewById(R.id.bt_google10);
+//                    button_google.setEnabled(true);
+//                    button_google2.setEnabled(true);
+//                    button_google4.setEnabled(true);
+//                    button_google6.setEnabled(true);
+//                    button_google8.setEnabled(true);
+//                    button_google10.setEnabled(true);
+//
+//                    LogUtils.d(TAG, "Connection Established");
+//                }else {
+//                    LogUtils.e(TAG, "Problem setting up in-app billing: " + billingResult.toString());
+//                }
+//            }
+//
+//            @Override
+//            public void onBillingServiceDisconnected() {
+//                // Try to restart the connection on the next request to
+//                // Google Play by calling the startConnection() method.
+//                Log.d(TAG, "Connection NOT Established");
+//                establishConnection();
+//            }
+//        });
     }
 
     @Override
@@ -323,54 +323,54 @@ public class DonationActivity extends AppCompatActivity {
     }
 
     public void donateGoogleOnClick(View view, String item_sku) {
-        try {
-            ArrayList<QueryProductDetailsParams.Product> productList = new ArrayList<>();
-
-            productList.add(
-                    QueryProductDetailsParams.Product.newBuilder()
-                            .setProductId(item_sku)
-                            .setProductType(BillingClient.ProductType.INAPP)
-                            .build()
-            );
-
-            QueryProductDetailsParams params = QueryProductDetailsParams.newBuilder()
-                    .setProductList(productList)
-                    .build();
-
-            billingClient.queryProductDetailsAsync(params, new ProductDetailsResponseListener() {
-                @Override
-                public void onProductDetailsResponse(@NonNull BillingResult billingResult, @NonNull List<ProductDetails> list) {
-
-                    //Do Anything that you want with requested product details
-
-                    //Calling this function here so that once products are verified we can start the purchase behavior.
-                    //You can save this detail in separate variable or list to call them from any other location
-                    //Create another function if you want to call this in establish connections' success state
-                    LaunchPurchaseFlow(list.get(0));
-
-
-                }
-            });
-        } catch (Exception e) {
-            LogUtils.e(TAG, e.getMessage());
-        }
+//        try {
+//            ArrayList<QueryProductDetailsParams.Product> productList = new ArrayList<>();
+//
+//            productList.add(
+//                    QueryProductDetailsParams.Product.newBuilder()
+//                            .setProductId(item_sku)
+//                            .setProductType(BillingClient.ProductType.INAPP)
+//                            .build()
+//            );
+//
+//            QueryProductDetailsParams params = QueryProductDetailsParams.newBuilder()
+//                    .setProductList(productList)
+//                    .build();
+//
+//            billingClient.queryProductDetailsAsync(params, new ProductDetailsResponseListener() {
+//                @Override
+//                public void onProductDetailsResponse(@NonNull BillingResult billingResult, @NonNull List<ProductDetails> list) {
+//
+//                    //Do Anything that you want with requested product details
+//
+//                    //Calling this function here so that once products are verified we can start the purchase behavior.
+//                    //You can save this detail in separate variable or list to call them from any other location
+//                    //Create another function if you want to call this in establish connections' success state
+//                    LaunchPurchaseFlow(list.get(0));
+//
+//
+//                }
+//            });
+//        } catch (Exception e) {
+//            LogUtils.e(TAG, e.getMessage());
+//        }
 
     }
 
-    void LaunchPurchaseFlow(ProductDetails productDetails) {
-        ArrayList<BillingFlowParams.ProductDetailsParams> productList = new ArrayList<>();
-
-        productList.add(
-                BillingFlowParams.ProductDetailsParams.newBuilder()
-                        .setProductDetails(productDetails)
-                        .build());
-
-        BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
-                .setProductDetailsParamsList(productList)
-                .build();
-
-        billingClient.launchBillingFlow(this, billingFlowParams);
-    }
+//    void LaunchPurchaseFlow(ProductDetails productDetails) {
+//        ArrayList<BillingFlowParams.ProductDetailsParams> productList = new ArrayList<>();
+//
+//        productList.add(
+//                BillingFlowParams.ProductDetailsParams.newBuilder()
+//                        .setProductDetails(productDetails)
+//                        .build());
+//
+//        BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
+//                .setProductDetailsParamsList(productList)
+//                .build();
+//
+//        billingClient.launchBillingFlow(this, billingFlowParams);
+//    }
 
     private void openBrowser(String url) {
         try {
