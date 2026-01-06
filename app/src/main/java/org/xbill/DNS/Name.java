@@ -550,9 +550,8 @@ isWild() {
 public boolean
 isAbsolute() {
 	int nlabels = labels();
-	if (nlabels == 0)
-		return false;
-        return name[offset(nlabels - 1)] == 0;
+	if (nlabels == 0) return false;
+	return name[offset(nlabels - 1)] == 0;
 }
 
 /**

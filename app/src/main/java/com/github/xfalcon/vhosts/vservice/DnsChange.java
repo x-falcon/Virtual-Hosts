@@ -50,7 +50,7 @@ public class DnsChange {
             packet_buffer.get(tmp_bytes);
             packet_buffer.reset();
             Message message = new Message(tmp_bytes);
-            Record question = message.getQuestion();
+            org.xbill.DNS.Record question = message.getQuestion();
             ConcurrentHashMap<String, String> DOMAINS_IP_MAPS;
             int type = question.getType();
             if (type == Type.A)
@@ -82,7 +82,7 @@ public class DnsChange {
                 }
             }
             InetAddress address = Address.getByAddress(DOMAINS_IP_MAPS.get(query_string));
-            Record record;
+            org.xbill.DNS.Record record;
             if (type == Type.A) record = new ARecord(query_domain, 1, 86400, address);
             else record = new AAAARecord(query_domain, 1, 86400, address);
             message.addRecord(record, 1);

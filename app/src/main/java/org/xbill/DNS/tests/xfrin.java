@@ -59,7 +59,7 @@ main(String [] args) throws Exception {
 
 	if (server == null) {
 		Lookup l = new Lookup(zname, Type.NS);
-		Record [] ns = l.run();
+		org.xbill.DNS.Record [] ns = l.run();
 		if (ns == null) {
 			System.out.println("failed to look up NS record: " +
 					   l.getErrorString());
