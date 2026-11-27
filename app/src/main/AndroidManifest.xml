@@ -12,6 +12,7 @@
     <!-- <uses-permission android:name="android.permission.READ_PHONE_STATE" /> -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
 <!--    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>-->
 <!--    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>-->
 <!--    <uses-permission android:name="android.permission.BLUETOOTH"/>-->
@@ -107,6 +108,8 @@
                     android:name="android.appwidget.provider"
                     android:resource="@xml/quick_start_widget_info"/>
         </receiver>
+
+        <activity android:name=".HostsGroupsActivity" android:exported="false" android:label="Hosts 分组"/>
 
         <activity android:name=".DonationActivity"
                   android:exported="false">

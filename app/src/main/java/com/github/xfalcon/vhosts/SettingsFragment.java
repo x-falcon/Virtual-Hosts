@@ -66,6 +66,17 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         handeleSummary(prefScreen, sharedPreferences);
         Preference urlCustomPref = findPreference(HOSTS_URL);
         Preference dnsCustomPref = findPreference(IPV4_DNS);
+        try {
+            if (new com.github.xfalcon.vhosts.groups.HostsGroupStore(requireContext()).load() != null) {
+                urlCustomPref.setEnabled(false);
+                urlCustomPref.setSummary("已使用 Hosts 分组；请返回首页管理分组");
+                findPreference(IS_NET).setEnabled(false);
+            }
+        } catch (Exception e) {
+            urlCustomPref.setEnabled(false);
+            findPreference(IS_NET).setEnabled(false);
+            urlCustomPref.setSummary("分组配置读取失败，请返回首页检查");
+        }
 
         dnsCustomPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
 
@@ -182,7 +193,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
                     Looper.prepare();
                     String result = HttpUtils.get(url);
                     FileUtils.writeFile(context.openFileOutput(NET_HOST_FILE, Context.MODE_PRIVATE), result);
-                    Toast.makeText(context, String.format(getString(R.string.down_success), DnsChange.handle_hosts(context.openFileInput(NET_HOST_FILE))), Toast.LENGTH_LONG).show();
+                    com.github.xfalcon.vhosts.groups.HostsGroups.Snapshot downloaded =
+                            DnsChange.parseHosts(context.openFileInput(NET_HOST_FILE));
+                    if (new com.github.xfalcon.vhosts.groups.HostsGroupStore(context).load() == null)
+                        DnsChange.installHosts(downloaded);
+                    Toast.makeText(context, String.format(getString(R.string.down_success), downloaded.size()), Toast.LENGTH_LONG).show();
                     handler.post(new Runnable() {
                         @Override
                         public void run() {

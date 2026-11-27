@@ -10,6 +10,7 @@
         <item name="android:textColorSecondary">@color/secondary_text</item>
         <item name="android:editTextColor">@color/secondary_text</item>
         <item name="colorButtonNormal">@color/primary</item>
+        <item name="alertDialogTheme">@style/HostsDialogTheme</item>
         <item name="dividerVertical">@color/divider</item>
     </style>
 
@@ -23,4 +24,11 @@
 
     </style>
 
+    <style name="HostsDialogTheme" parent="ThemeOverlay.AppCompat.Dialog.Alert">
+        <item name="android:textColorPrimary">@color/primary_text</item>
+        <item name="android:textColorSecondary">@color/secondary_text</item>
+        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:editTextColor">@color/primary_text</item>
+        <item name="colorAccent">@color/primary_dark</item>
+    </style>
 </resources>

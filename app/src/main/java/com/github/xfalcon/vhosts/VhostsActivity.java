@@ -34,6 +34,9 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.suke.widget.SwitchButton;
 
 import java.lang.reflect.Field;
+import com.github.xfalcon.vhosts.groups.HostsGroupStore;
+import com.github.xfalcon.vhosts.groups.HostsGroups;
+import java.util.List;
 
 public class VhostsActivity extends AppCompatActivity {
 
@@ -43,13 +46,14 @@ public class VhostsActivity extends AppCompatActivity {
 
 
     private boolean waitingForVPNStart;
+    private boolean updatingVpnButton;
 
     private BroadcastReceiver vpnStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (VhostsService.BROADCAST_VPN_STATE.equals(intent.getAction())) {
-                if (intent.getBooleanExtra("running", false))
-                    waitingForVPNStart = false;
+                waitingForVPNStart = false;
+                setButton(!intent.getBooleanExtra("running", false));
             }
         }
     };
@@ -63,9 +67,12 @@ public class VhostsActivity extends AppCompatActivity {
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         setContentView(R.layout.activity_vhosts);
+        com.github.xfalcon.vhosts.util.SystemBarInsets.apply(this);
         LogUtils.context = getApplicationContext();
         final SwitchButton vpnButton = findViewById(R.id.button_start_vpn);
 
+        findViewById(R.id.button_groups).setOnClickListener(v ->
+                startActivity(new Intent(this, HostsGroupsActivity.class)));
         final Button selectHosts = findViewById(R.id.button_select_hosts);
         final FloatingActionButton fab_setting = findViewById(R.id.fab_setting);
         final FloatingActionButton fab_boot = findViewById(R.id.fab_boot);
@@ -80,6 +87,7 @@ public class VhostsActivity extends AppCompatActivity {
         vpnButton.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(SwitchButton view, boolean isChecked) {
+                if (updatingVpnButton) return;
                 if (isChecked) {
                     if (checkHostUri() == -1) {
                         showDialog();
@@ -112,7 +120,8 @@ public class VhostsActivity extends AppCompatActivity {
         selectHosts.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selectFile();
+                if (hasGroups()) startActivity(new Intent(VhostsActivity.this, HostsGroupsActivity.class));
+                else selectFile();
             }
         });
         selectHosts.setOnLongClickListener(new View.OnLongClickListener() {
@@ -189,6 +198,16 @@ public class VhostsActivity extends AppCompatActivity {
     }
 
     private int checkHostUri() {
+        try {
+            List<HostsGroups.Group> groups = new HostsGroupStore(this).load();
+            if (groups != null) {
+                HostsGroups.merge(groups);
+                return 3;
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "分组配置错误：" + e.getMessage(), Toast.LENGTH_LONG).show();
+            return -1;
+        }
         SharedPreferences settings =  androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
         if (settings.getBoolean(SettingsFragment.IS_NET, false)) {
             try {
@@ -251,7 +270,7 @@ public class VhostsActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SettingsFragment.VPN_REQUEST_CODE && resultCode == RESULT_OK) {
             waitingForVPNStart = true;
-            startService(new Intent(this, VhostsService.class).setAction(VhostsService.ACTION_CONNECT));
+            VhostsService.startVService(this, 1);
             setButton(false);
         } else if (requestCode == SettingsFragment.SELECT_FILE_CODE && resultCode == RESULT_OK) {
             setUriByPREFS(data);
@@ -265,6 +284,12 @@ public class VhostsActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(vpnStateReceiver);
+        super.onDestroy();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
     }
@@ -272,15 +297,27 @@ public class VhostsActivity extends AppCompatActivity {
     private void setButton(boolean enable) {
         final SwitchButton vpnButton = (SwitchButton) findViewById(R.id.button_start_vpn);
         final Button selectHosts = (Button) findViewById(R.id.button_select_hosts);
+        boolean grouped = hasGroups();
+        selectHosts.setText(grouped ? "管理 Hosts 分组" : getString(R.string.re_select_hosts));
+        updatingVpnButton = true;
+        // This widget broadcasts again at animation end, after a synchronous guard is cleared.
+        vpnButton.setEnableEffect(false);
         if (enable) {
             vpnButton.setChecked(false);
             selectHosts.setAlpha(1.0f);
             selectHosts.setClickable(true);
         } else {
             vpnButton.setChecked(true);
-            selectHosts.setAlpha(.5f);
-            selectHosts.setClickable(false);
+            selectHosts.setAlpha(grouped ? 1f : .5f);
+            selectHosts.setClickable(grouped);
         }
+        vpnButton.setEnableEffect(true);
+        updatingVpnButton = false;
+    }
+
+    private boolean hasGroups() {
+        try { return new HostsGroupStore(this).load() != null; }
+        catch (Exception e) { return true; }
     }
 
     private void showDialog() {

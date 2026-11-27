@@ -32,6 +32,9 @@ import android.os.ParcelFileDescriptor;
 import android.widget.Toast;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.github.xfalcon.vhosts.NetworkReceiver;
+import com.github.xfalcon.vhosts.groups.HostsGroupStore;
+import com.github.xfalcon.vhosts.groups.HostsGroups;
+import java.util.List;
 import com.github.xfalcon.vhosts.R;
 import com.github.xfalcon.vhosts.SettingsFragment;
 import com.github.xfalcon.vhosts.VhostsActivity;
@@ -59,6 +62,8 @@ public class VhostsService extends VpnService {
 
     public static final String BROADCAST_VPN_STATE = VhostsService.class.getName() + ".VPN_STATE";
     public static final String ACTION_CONNECT = VhostsService.class.getName() + ".START";
+    public static final String ACTION_RESTART = VhostsService.class.getName() + ".RESTART";
+    private boolean restartAfterDestroy;
     public static final String ACTION_DISCONNECT = VhostsService.class.getName() + ".STOP";
 
     private static boolean isRunning = false;
@@ -84,7 +89,7 @@ public class VhostsService extends VpnService {
     public void onCreate() {
 //        registerNetReceiver();
         super.onCreate();
-        if (isOAndBoot) {
+        {
             //android 8.0 boot
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 NotificationChannel channel = new NotificationChannel("vhosts_channel_id", "System", NotificationManager.IMPORTANCE_NONE);
@@ -98,7 +103,10 @@ public class VhostsService extends VpnService {
             }
             isOAndBoot = false;
         }
-        setupHostFile();
+        if (!setupHostFile()) {
+            stopSelf();
+            return;
+        }
         setupVPN();
         if (vpnInterface == null) {
             LogUtils.d(TAG, "unknow error");
@@ -132,37 +140,28 @@ public class VhostsService extends VpnService {
     }
 
 
-    private void setupHostFile() {
-        SharedPreferences settings = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
-        final boolean is_net = settings.getBoolean(SettingsFragment.IS_NET, false);
-        String uri_path = settings.getString(SettingsFragment.HOSTS_URI, null);
+    private boolean setupHostFile() {
         try {
-            final InputStream inputStream;
-            if (is_net)
-                inputStream = openFileInput(SettingsFragment.NET_HOST_FILE);
-            else
-                inputStream = getContentResolver().openInputStream(Uri.parse(uri_path));
-            new Thread() {
-                public void run() {
-                    if (DnsChange.handle_hosts(inputStream) == 0) {
-                        Looper.prepare();
-                        if(is_net){
-                            Toast.makeText(getApplicationContext(), R.string.no_net_record, Toast.LENGTH_LONG).show();
-                        }else{
-                            Toast.makeText(getApplicationContext(), R.string.no_local_record, Toast.LENGTH_LONG).show();
-                        }
-                        Looper.loop();
-                    }
-                }
-            }.start();
-
-        } catch (Exception e) {
-            if(is_net){
-                Toast.makeText(getApplicationContext(), R.string.no_net_record, Toast.LENGTH_LONG).show();
-            }else{
-                Toast.makeText(getApplicationContext(), R.string.no_local_record, Toast.LENGTH_LONG).show();
+            List<HostsGroups.Group> groups = new HostsGroupStore(this).load();
+            if (groups != null) {
+                DnsChange.installHosts(HostsGroups.merge(groups));
+            } else {
+                SharedPreferences settings = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
+                InputStream inputStream;
+                if (settings.getBoolean(SettingsFragment.IS_NET, false))
+                    inputStream = openFileInput(SettingsFragment.NET_HOST_FILE);
+                else
+                    inputStream = getContentResolver().openInputStream(
+                            Uri.parse(settings.getString(SettingsFragment.HOSTS_URI, "")));
+                HostsGroups.Snapshot snapshot = DnsChange.parseHosts(inputStream);
+                if (snapshot.size() == 0) throw new IOException("hosts 文件没有有效记录");
+                DnsChange.installHosts(snapshot);
             }
+            return true;
+        } catch (Exception e) {
+            Toast.makeText(this, "无法加载 hosts：" + e.getMessage(), Toast.LENGTH_LONG).show();
             LogUtils.e(TAG, "error setup host file service", e);
+            return false;
         }
     }
 
@@ -230,7 +229,14 @@ public class VhostsService extends VpnService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
+            if (ACTION_RESTART.equals(intent.getAction())) {
+                restartAfterDestroy = true;
+                // The system binds VpnService while its TUN is open; close it before stopping.
+                stopVService();
+                return START_NOT_STICKY;
+            }
             if (ACTION_DISCONNECT.equals(intent.getAction())) {
+                restartAfterDestroy = false;
                 stopVService();
                 return START_NOT_STICKY;
             }
@@ -249,9 +255,10 @@ public class VhostsService extends VpnService {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
             LogUtils.e(TAG, "Run Fail On Boot");
+            return;
         }
         try {
-            if (method == 2 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 isOAndBoot = true;
                 context.startForegroundService(new Intent(context, VhostsService.class).setAction(ACTION_CONNECT));
             } else {
@@ -260,6 +267,17 @@ public class VhostsService extends VpnService {
             }
         } catch (RuntimeException e) {
             LogUtils.e(TAG, "Not allowed to start service Intent", e);
+        }
+    }
+
+    public static void restartIfRunning(Context context) {
+        if (isRunning) {
+            try {
+                context.startService(new Intent(context, VhostsService.class).setAction(ACTION_RESTART));
+            } catch (RuntimeException e) {
+                LogUtils.e(TAG, "VPN restart request failed", e);
+                Toast.makeText(context, "配置已保存，但自动重启失败，请手动重启 hosts 开关", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -272,6 +290,7 @@ public class VhostsService extends VpnService {
 //        unregisterNetReceiver();
         if (executorService != null) executorService.shutdownNow();
         isRunning = false;
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_VPN_STATE).putExtra("running", false));
         cleanup();
         stopSelf();
         LogUtils.d(TAG, "Stopping");
@@ -279,6 +298,7 @@ public class VhostsService extends VpnService {
 
     @Override
     public void onRevoke() {
+        restartAfterDestroy = false;
         stopVService();
         super.onRevoke();
     }
@@ -287,6 +307,10 @@ public class VhostsService extends VpnService {
     public void onDestroy() {
         stopVService();
         super.onDestroy();
+        if (restartAfterDestroy && VpnService.prepare(this) == null) {
+            LogUtils.i(TAG, "Restarting VPN for updated hosts");
+            startVService(getApplicationContext(), 1);
+        }
     }
 
     private void cleanup() {

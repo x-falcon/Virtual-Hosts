@@ -32,6 +32,7 @@ public class SettingsActivity extends AppCompatActivity{
         setTheme(R.style.AppPreferenceTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        com.github.xfalcon.vhosts.util.SystemBarInsets.apply(this);
         ActionBar actionBar = this.getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
