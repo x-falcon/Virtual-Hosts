@@ -88,6 +88,7 @@ public class DonationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_donation);
+        com.github.xfalcon.vhosts.util.SystemBarInsets.apply(this);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         CardView cv_alipay = (CardView) findViewById(R.id.cv_alipay);
         CardView cv_wexin = (CardView) findViewById(R.id.cv_wexin);
